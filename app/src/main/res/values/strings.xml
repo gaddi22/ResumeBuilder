@@ -3,7 +3,7 @@
     <string name="build_template_button_text">Build Template</string>
 
     <string name="add_new_document_button_text">Add New Document</string>
-    <string name="add_data_button_text">AddData</string>
+    <string name="add_data_button_text">Add Data</string>
 
     <string name="title_activity_login">LoginActivity</string>
     <!--

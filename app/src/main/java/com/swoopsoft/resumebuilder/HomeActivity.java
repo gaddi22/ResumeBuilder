@@ -3,6 +3,7 @@ package com.swoopsoft.resumebuilder;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.widget.Button;
@@ -33,7 +34,8 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void addData() {
-        Toast.makeText(getApplicationContext(), "Navigate to Add Data Activity", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getApplicationContext(), "Navigate to Add Data Activity", Toast.LENGTH_SHORT).show();
+        startActivity(new Intent(getApplicationContext(), DataActivity.class));
     }
 
     private void addDocument() {

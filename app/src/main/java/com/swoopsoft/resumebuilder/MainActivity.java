@@ -32,7 +32,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         data = findViewById(R.id.view_data_main);
         data.setOnClickListener(this);
 
-        startActivity(new Intent(getApplicationContext(),DataActivity.class));
+        //startActivity(new Intent(getApplicationContext(),DataActivity.class));
+        startActivity(new Intent(getApplicationContext(), HomeActivity.class));
 
     }
 
