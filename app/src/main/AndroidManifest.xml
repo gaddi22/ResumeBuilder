@@ -13,6 +13,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ResumeBuilder">
         <activity
+            android:name=".HomeActivity"
+            android:exported="false" />
+        <activity 
             android:name=".CreateDataActivity"
             android:exported="false" />
         <activity android:name=".MainActivity" />
