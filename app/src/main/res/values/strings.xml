@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">ResumeBuilder</string>
+    <string name="add_new_document_button_text">Add New Document</string>
+    <string name="add_data_button_text">AddData</string>
 </resources>
