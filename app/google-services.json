@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1059996958894",
+    "project_id": "resumebuilder-d0f21",
+    "storage_bucket": "resumebuilder-d0f21.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1059996958894:android:cce77a6606979a7926ed3f",
+        "android_client_info": {
+          "package_name": "com.swoopsoft.resumebuilder"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1059996958894-ku6v3mliuhiknosct724hr412ojqb7ek.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDTfxEdH-otl05MN8fhKQNQCff96HQOHVM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1059996958894-ku6v3mliuhiknosct724hr412ojqb7ek.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
