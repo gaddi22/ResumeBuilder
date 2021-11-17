@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">ResumeBuilder</string>
+    <string name="build_template_button_text">Build Template</string>
 </resources>
