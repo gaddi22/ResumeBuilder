@@ -39,7 +39,8 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void addDocument() {
-        Toast.makeText(getApplicationContext(), "Navigate to Add Document Activity", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(getApplicationContext(), "Navigate to Add Document Activity", Toast.LENGTH_SHORT).show();
+        startActivity(new Intent(getApplicationContext(), ChooseTemplateActivity.class));
     }
 
     private void getDocuments(){
