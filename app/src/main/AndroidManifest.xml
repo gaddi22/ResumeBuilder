@@ -10,6 +10,20 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ResumeBuilder">
         <activity
+            android:name=".HomeActivity"
+            android:exported="false" />
+        <activity
+            android:name=".CreateDataActivity"
+            android:exported="false" />
+        <activity
+        android:name=".ChooseTemplateActivity"
+        android:exported="false" />
+        <activity android:name=".MainActivity" />
+        <activity android:name=".RegisterActivity" />
+        <activity android:name=".DataActivity" />
+        <activity android:name=".LoginActivity"
+            android:exported="true">
+        <activity
             android:name=".TemplateBuilderActivity"
             android:exported="false" />
         <activity android:name=".MainActivity">
