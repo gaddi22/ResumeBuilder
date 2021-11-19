@@ -12,15 +12,56 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.View.*
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.Toast
 
 class TemplateBuilderActivity : AppCompatActivity() {
+
     var templateLayout: LinearLayout? = null
+    private lateinit var button1: Button
+    private lateinit var button2: Button
+    private lateinit var button3: Button
+    private lateinit var button4: Button
+    private lateinit var button5: Button
+    private lateinit var button6: Button
+    private lateinit var button7: Button
+    private lateinit var button8: Button
+    private lateinit var button9: Button
+    private lateinit var button10: Button
+    private lateinit var button11: Button
+    private lateinit var button12: Button
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_template_builder)
+
         templateLayout = findViewById(R.id.template_builder_layout)
+        button1 = findViewById(R.id.button1)
+        button2 = findViewById(R.id.button2)
+        button3 = findViewById(R.id.button3)
+        button4 = findViewById(R.id.button4)
+        button5 = findViewById(R.id.button5)
+        button6 = findViewById(R.id.button6)
+        button7 = findViewById(R.id.button7)
+        button8 = findViewById(R.id.button8)
+        button9 = findViewById(R.id.button9)
+        button10 = findViewById(R.id.button10)
+        button11 = findViewById(R.id.button11)
+        button12 = findViewById(R.id.button12)
+
+        button1.setOnClickListener(clickListener)
+        button2.setOnClickListener(clickListener)
+        button3.setOnClickListener(clickListener)
+        button4.setOnClickListener(clickListener)
+        button5.setOnClickListener(clickListener)
+        button6.setOnClickListener(clickListener)
+        button7.setOnClickListener(clickListener)
+        button8.setOnClickListener(clickListener)
+        button9.setOnClickListener(clickListener)
+        button10.setOnClickListener(clickListener)
+        button11.setOnClickListener(clickListener)
+        button12.setOnClickListener(clickListener)
     }
 
     private val longClickListener = OnLongClickListener { v: View ->
