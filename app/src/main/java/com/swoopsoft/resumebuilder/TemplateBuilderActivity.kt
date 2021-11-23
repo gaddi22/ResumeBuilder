@@ -56,21 +56,21 @@ class TemplateBuilderActivity : AppCompatActivity() {
         elementsLayout.setOnDragListener(dragListener)
         mainLayout.setOnDragListener(dragListener)
 
-        textView1.setOnClickListener(clickListener)
+//        textView1.setOnClickListener(clickListener)
         textView1.setOnLongClickListener(longClickListener)
 
-        button1.setOnClickListener(clickListener)
-        button2.setOnClickListener(clickListener)
-        button3.setOnClickListener(clickListener)
-        button4.setOnClickListener(clickListener)
-        button5.setOnClickListener(clickListener)
-        button6.setOnClickListener(clickListener)
-        button7.setOnClickListener(clickListener)
-        button8.setOnClickListener(clickListener)
-        button9.setOnClickListener(clickListener)
-        button10.setOnClickListener(clickListener)
-        button11.setOnClickListener(clickListener)
-        button12.setOnClickListener(clickListener)
+//        button1.setOnClickListener(clickListener)
+//        button2.setOnClickListener(clickListener)
+//        button3.setOnClickListener(clickListener)
+//        button4.setOnClickListener(clickListener)
+//        button5.setOnClickListener(clickListener)
+//        button6.setOnClickListener(clickListener)
+//        button7.setOnClickListener(clickListener)
+//        button8.setOnClickListener(clickListener)
+//        button9.setOnClickListener(clickListener)
+//        button10.setOnClickListener(clickListener)
+//        button11.setOnClickListener(clickListener)
+//        button12.setOnClickListener(clickListener)
 
         button1.setOnLongClickListener(longClickListener)
         button2.setOnLongClickListener(longClickListener)
@@ -85,18 +85,6 @@ class TemplateBuilderActivity : AppCompatActivity() {
         button11.setOnLongClickListener(longClickListener)
         button12.setOnLongClickListener(longClickListener)
 
-//        button1.setOnDragListener(dragListener)
-//        button2.setOnDragListener(dragListener)
-//        button3.setOnDragListener(dragListener)
-//        button4.setOnDragListener(dragListener)
-//        button5.setOnDragListener(dragListener)
-//        button6.setOnDragListener(dragListener)
-//        button7.setOnDragListener(dragListener)
-//        button8.setOnDragListener(dragListener)
-//        button9.setOnDragListener(dragListener)
-//        button10.setOnDragListener(dragListener)
-//        button11.setOnDragListener(dragListener)
-//        button12.setOnDragListener(dragListener)
 
 //        button1.setOnTouchListener(touchListener)
 //        button2.setOnTouchListener(touchListener)
@@ -136,6 +124,7 @@ class TemplateBuilderActivity : AppCompatActivity() {
         it.startDragAndDrop(data, dragShadowBuilder, it, 0)
 
         it.visibility = INVISIBLE
+        true
     }
 
     private val touchListener = OnTouchListener { it, motionEvent ->
@@ -159,51 +148,38 @@ class TemplateBuilderActivity : AppCompatActivity() {
     }
 
     private val dragListener = OnDragListener{ view, event ->
+        val v = event.localState as View
         when(event.action) {
             DragEvent.ACTION_DRAG_STARTED -> {
-//                text1.text = String.format(resources.getString(R.string.started_message),view.id) //"Started: ${view.id}"
-//                text2.text = String.format(resources.getString(R.string.started_message),view.tag) //"Started: ${view.tag}"
-//                text1.setTextColor(Color.BLUE)
-//                text1.invalidate()
-
-                val v = event.localState as View
+//                val v = event.localState as View
                 (v as? ImageView)?.setColorFilter(Color.RED)
                 (v as? Button)?.setBackgroundColor(Color.BLUE)
                 v.invalidate()
                 event.clipDescription.hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN)
             }
             DragEvent.ACTION_DRAG_ENTERED -> {
-//                text1.text = String.format(resources.getString(R.string.entered_message),view.id) //"Entered: " + view.id.toString()
-//                text2.text = String.format(resources.getString(R.string.entered_message),view.tag) //"Entered: " + view.tag.toString()
                 view.invalidate()
                 true
             }
             DragEvent.ACTION_DRAG_LOCATION -> {
-//                text1.text = String.format(resources.getString(R.string.location_message),view.id, event.x, event.y) //"Location: " + view.id.toString()
-//                text2.text = String.format(resources.getString(R.string.location_message),view.tag, event.x, event.y) //"Location: " + view.tag.toString()
                 true
             }
             DragEvent.ACTION_DRAG_EXITED -> {
-//                text1.text = String.format(resources.getString(R.string.exited_message),view.id) //"Exited: " + view.id.toString()
-//                text2.text = String.format(resources.getString(R.string.exited_message),view.tag) //"Exited: " + view.tag.toString()
                 view.invalidate()
                 true
             }
             DragEvent.ACTION_DROP -> {
-//                text1.text = String.format(resources.getString(R.string.drop_message),view.id) //"Drop: " + view.id.toString()
-//                text2.text = String.format(resources.getString(R.string.drop_message),view.tag) //"Drop: " + view.tag.toString()
-//                text1.setTextColor(Color.GREEN)
-//                text1.invalidate()
+                v.visibility = VISIBLE
                 val item = event.clipData.getItemAt(0)
                 val dragData = item.text
-                Toast.makeText(this, dragData, Toast.LENGTH_SHORT).show()
-                val v = event.localState as View
+//                displayMessageWithShortToast(dragData as String)
+//                val v = event.localState as View
 
                 val destination = view as LinearLayout
 
-                Toast.makeText(applicationContext, "destination_id: ${destination.id}", Toast.LENGTH_SHORT)
+                displayMessageWithShortToast("destination_id: ${destination.id}")
                 if (destination.id == R.id.template_builder_layout) {
-                    Toast.makeText(applicationContext, "destination_id: ${destination.id}", Toast.LENGTH_LONG)
+                    displayMessageWithLongToast("destination_id: ${destination.id}")
                     val owner = v.parent as ViewGroup
                     owner.removeView(v)
                     destination.addView(v)
@@ -212,18 +188,39 @@ class TemplateBuilderActivity : AppCompatActivity() {
                     (v as? ImageView)?.setBackgroundColor(Color.RED)
 
                     view.invalidate()
-                } else {
-                    destination.setBackgroundColor(Color.GREEN)
-                    destination.invalidate()
                 }
+//                else if (destination.id == R.id.layout_elements) {
+//                    val owner = v.parent as ViewGroup
+//                    owner.invalidate()
+//                } else {
+////                    destination.setBackgroundColor(Color.GREEN)
+////                    destination.invalidate()
+//                    val owner = v.parent as ViewGroup
+//                    owner.removeView(v)
+//                    templateLayout.addView(v)
+//                    v.visibility = VISIBLE
+//                    (v as? ImageView)?.setColorFilter(Color.RED)
+//                    (v as? ImageView)?.setBackgroundColor(Color.RED)
+//
+//                    view.invalidate()
+//                }
                 true
             }
             DragEvent.ACTION_DRAG_ENDED -> {
                 view.invalidate()
+                v.visibility = VISIBLE
                 true
             }
             else -> false
         }
+    }
+
+    private fun displayMessageWithLongToast(message:String){
+        Toast.makeText(applicationContext, message, Toast.LENGTH_LONG).show()
+    }
+
+    private fun displayMessageWithShortToast(message:String){
+        Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT).show()
     }
 
 //    private val longClickListener = OnLongClickListener { v: View ->
