@@ -7,6 +7,7 @@
     tools:context=".TemplateBuilderActivity">
 
     <LinearLayout
+        android:id="@+id/template_builder_main_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="3dp"
@@ -26,8 +27,17 @@
             <LinearLayout
                 android:id="@+id/template_builder_layout"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical" />
+                android:layout_height="match_parent"
+                android:background="@color/white"
+                android:orientation="vertical" >
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="100dp"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="something to fill the space" />
+            </LinearLayout>
         </ScrollView>
 
         <ScrollView
@@ -37,6 +47,7 @@
             tools:ignore="SpeakableTextPresentCheck">
 
             <LinearLayout
+                android:id="@+id/layout_elements"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical" >
@@ -59,6 +70,12 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Row" />
+
+                        <TextView
+                            android:id="@+id/textView1"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="RowTV" />
 
                         <Space
                             android:layout_width="match_parent"
