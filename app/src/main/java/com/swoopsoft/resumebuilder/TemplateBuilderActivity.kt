@@ -56,7 +56,6 @@ class TemplateBuilderActivity : AppCompatActivity() {
         elementsLayout.setOnDragListener(dragListener)
         mainLayout.setOnDragListener(dragListener)
 
-//        textView1.setOnClickListener(clickListener)
         textView1.setOnLongClickListener(longClickListener)
 
         button1.setOnLongClickListener(longClickListener)
@@ -148,9 +147,9 @@ class TemplateBuilderActivity : AppCompatActivity() {
 
                 val destination = view as LinearLayout
 
-                displayMessageWithShortToast("destination_id: ${destination.id}")
+                displayMessageWithToast("destination_id: ${destination.id}", false)
                 if (destination.id == R.id.template_builder_layout) {
-                    displayMessageWithLongToast("destination_id: ${destination.id}")
+                    displayMessageWithToast("destination_id: ${destination.id}")
                     val owner = v.parent as ViewGroup
                     owner.removeView(v)
                     destination.addView(v)
@@ -170,11 +169,12 @@ class TemplateBuilderActivity : AppCompatActivity() {
         }
     }
 
-    private fun displayMessageWithLongToast(message:String){
-        Toast.makeText(applicationContext, message, Toast.LENGTH_LONG).show()
-    }
-
-    private fun displayMessageWithShortToast(message:String){
-        Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT).show()
+    private fun displayMessageWithToast(message:String, long:Boolean=true){
+        if (long) {
+            Toast.makeText(applicationContext, message, Toast.LENGTH_LONG).show()
+        }
+        else {
+            Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT).show()
+        }
     }
 }
