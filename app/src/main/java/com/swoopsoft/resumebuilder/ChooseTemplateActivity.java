@@ -3,6 +3,7 @@ package com.swoopsoft.resumebuilder;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.widget.Button;
@@ -29,7 +30,7 @@ public class ChooseTemplateActivity extends AppCompatActivity {
     }
 
     private void openBuildTemplateActivity(){
-        Toast.makeText(getApplicationContext(), "Open the Activity for building a Template", Toast.LENGTH_SHORT).show();
+        startActivity(new Intent(getApplicationContext(), TemplateBuilderActivity.class));
     }
 
     private void getDocuments(){
