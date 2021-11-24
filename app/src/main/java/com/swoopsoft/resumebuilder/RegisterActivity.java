@@ -61,32 +61,34 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         }
         if(view == register){
             registerUser();
+            System.out.println("reached here");
         }
     }
 
     private void registerUser() {
         //check for empty fields
         if(TextUtils.isEmpty(email.getText().toString())){
-            Toast.makeText(getApplicationContext(), "Please enter an email", Toast.LENGTH_LONG);
+            Toast.makeText(getApplicationContext(), "Please enter an email", Toast.LENGTH_LONG).show();
             return;
         }
         if(TextUtils.isEmpty(password.getText().toString())){
-            Toast.makeText(getApplicationContext(), "Please enter a password", Toast.LENGTH_LONG);
+            Toast.makeText(getApplicationContext(), "Please enter a password", Toast.LENGTH_LONG).show();
             return;
         }
-        if(TextUtils.equals(password.getText().toString(),confPass.getText().toString())){
-            Toast.makeText(getApplicationContext(), "Confirmation password does not match", Toast.LENGTH_LONG);
+        if(!TextUtils.equals(password.getText().toString(),confPass.getText().toString())){
+            Toast.makeText(getApplicationContext(), "Confirmation password does not match", Toast.LENGTH_LONG).show();
             return;
         }
 
+
+        Toast.makeText(getApplicationContext(),"Registering ... ", Toast.LENGTH_LONG).show();
         auth.createUserWithEmailAndPassword(email.getText().toString(),password.getText().toString())
                 .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
                     @Override
                     public void onSuccess(AuthResult authResult) {
                         Log.d("RegisterActivity","Creating User");
                         createUser();
-                        startActivity(new Intent(getApplicationContext(),MainActivity.class));
-                        finish();
+
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -95,14 +97,37 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                         Toast.makeText(getApplicationContext(),"Failed to create user: " + e.getMessage(),Toast.LENGTH_LONG).show();
                     }
                 });
+
     }
 
     private void createUser() {
-        //TODO: Create user object
-        FirebaseDatabase.getInstance().getReference().child("users").setValue(user.getUid());
-        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("users").child(user.getUid());
-        userRef.child("email").setValue(user.getEmail());
-        userRef.child("data").push();
+        user = auth.getCurrentUser();
+        //Create user object
+        FirebaseDatabase.getInstance().getReference().child("users").setValue(user.getUid()).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void unused) {
+                DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("users").child(user.getUid());
+                userRef.child("email").setValue(user.getEmail()).addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        startActivity(new Intent(getApplicationContext(),MainActivity.class));
+                        finish();
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(getApplicationContext(),"Could not create user: "+e.getMessage(),Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(getApplicationContext(),"Could not create user: "+e.getMessage(),Toast.LENGTH_LONG).show();
+            }
+        });
+
+
     }
 
 }

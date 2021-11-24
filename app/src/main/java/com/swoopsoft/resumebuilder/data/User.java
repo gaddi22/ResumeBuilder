@@ -30,6 +30,11 @@ public class User {
         userRef.child("data").child(name).setValue(value);
     }
 
+    public HashMap getData(){
+        DataSnapshot snapshot = userRef.child("data").get().getResult();
+        return snapshot.getValue(HashMap.class);
+    }
+
 }
 
 

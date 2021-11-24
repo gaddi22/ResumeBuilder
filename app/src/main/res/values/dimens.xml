@@ -12,4 +12,9 @@
     inner_frame_layout_padding (below variable) on round screens.
     -->
     <dimen name="inner_frame_layout_padding">5dp</dimen>
+    <dimen name="data_key_weight">4</dimen>
+    <dimen name="data_values_weight">10</dimen>
+    <dimen name="data_button_weight">0.25</dimen>
+    <dimen name="data_card_corner_radius">15dp</dimen>
+    <dimen name="data_card_content_padding">5dp</dimen>
 </resources>

@@ -77,6 +77,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 @Override
                 public void onSuccess(AuthResult authResult) {
                     startActivity(new Intent(getApplicationContext(),MainActivity.class));
+                    finish();
                 }
             })
         .addOnFailureListener(new OnFailureListener() {
