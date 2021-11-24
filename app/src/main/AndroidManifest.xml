@@ -21,6 +21,10 @@
         <activity android:name=".MainActivity" />
         <activity android:name=".RegisterActivity" />
         <activity android:name=".DataActivity" />
+
+        <activity
+            android:name=".TemplateBuilderActivity"
+            android:exported="false" />
         <activity android:name=".LoginActivity"
             android:exported="true">
             <intent-filter>
