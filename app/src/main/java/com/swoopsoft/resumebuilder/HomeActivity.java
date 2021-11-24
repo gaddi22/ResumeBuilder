@@ -11,10 +11,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+
 public class HomeActivity extends AppCompatActivity {
 
     Button btnAddNewDocument;
     Button btnAddData;
+    Button btnLogOut;
     LinearLayout llDocumentContainer;
 
     @Override
@@ -22,15 +25,23 @@ public class HomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
+        btnLogOut = findViewById(R.id.btnLogOut);
         btnAddData = findViewById(R.id.btnHomeAddData);
         btnAddNewDocument = findViewById(R.id.btnHomeAddNewDocument);
         llDocumentContainer = findViewById(R.id.linearLayoutDocumentContainer);
 
+        btnLogOut.setOnClickListener(view -> logOut());
         btnAddData.setOnClickListener(view -> addData());
         btnAddNewDocument.setOnClickListener(view -> addDocument());
 
         getDocuments();
 
+    }
+
+    private void logOut() {
+        FirebaseAuth.getInstance().signOut();
+        startActivity(new Intent(getApplicationContext(), LoginActivity.class));
+        finish();
     }
 
     private void addData() {
