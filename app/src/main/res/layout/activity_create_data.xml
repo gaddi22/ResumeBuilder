@@ -41,7 +41,7 @@
         app:layout_constraintTop_toBottomOf="@+id/textView" />
 
     <EditText
-        android:id="@+id/editTextTextPersonName2"
+        android:id="@+id/obj_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
@@ -54,14 +54,24 @@
         app:layout_constraintTop_toBottomOf="@+id/obj_name" />
 
     <ImageView
-        android:id="@+id/imageView"
+        android:id="@+id/obj_image"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="64dp"
         android:scaleX="2"
         android:scaleY="2"
-        app:layout_constraintEnd_toEndOf="@+id/editTextTextPersonName2"
-        app:layout_constraintStart_toStartOf="@+id/editTextTextPersonName2"
-        app:layout_constraintTop_toBottomOf="@+id/editTextTextPersonName2"
+        app:layout_constraintEnd_toEndOf="@+id/obj_text"
+        app:layout_constraintStart_toStartOf="@+id/obj_text"
+        app:layout_constraintTop_toBottomOf="@+id/obj_text"
         app:srcCompat="@android:drawable/ic_menu_gallery" />
+
+    <Button
+        android:id="@+id/submit_obj"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="@string/submit"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/obj_image" />
 </androidx.constraintlayout.widget.ConstraintLayout>

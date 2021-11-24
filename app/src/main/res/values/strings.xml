@@ -33,5 +33,6 @@
     <string name="remove_item">Remove</string>
     <string name="obj_name">Block Name</string>
     <string name="obj_data">Block Value</string>
+    <string name="submit">Submit</string>
 
 </resources>

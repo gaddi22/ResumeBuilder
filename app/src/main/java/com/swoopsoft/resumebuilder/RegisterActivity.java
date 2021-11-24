@@ -18,6 +18,8 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class RegisterActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -97,6 +99,10 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 
     private void createUser() {
         //TODO: Create user object
+        FirebaseDatabase.getInstance().getReference().child("users").setValue(user.getUid());
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("users").child(user.getUid());
+        userRef.child("email").setValue(user.getEmail());
+        userRef.child("data").push();
     }
 
 }
