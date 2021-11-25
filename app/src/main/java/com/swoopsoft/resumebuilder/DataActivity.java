@@ -41,13 +41,13 @@ public class DataActivity extends AppCompatActivity implements View.OnClickListe
         if(view == addData){
             startActivity(new Intent(getApplicationContext(),CreateDataActivity.class));
         }
-//        for(DataRow row : rows){
-//            if(view == row.getButton()){
-//                removeItem();
-//            }
-//        }
+        for(DataRow row : rows){
+            if(view == row.getButton()){
+                removeItem();
+            }
+        }
     }
 
-//    private void removeItem() {
-//    }
+    private void removeItem() {
+    }
 }

@@ -204,14 +204,10 @@ public class CreateDataActivity extends AppCompatActivity implements View.OnClic
 
     private boolean unique() {
         DatabaseReference dataRef = FirebaseDatabase.getInstance().getReference().child("users").child(user.getUid()).child("data");
-        try {
-            Map dataMap = (Map) dataRef.get();
-            if (dataMap.containsKey(dataName.getText().toString())) {
-                return false;
-            }
-        } catch(Exception e){
-
+        Map dataMap = (Map) dataRef.get();
+        if(dataMap.containsKey(dataName.getText().toString())){
+            return false;
         }
-        return true;
+        else return true;
     }
 }
