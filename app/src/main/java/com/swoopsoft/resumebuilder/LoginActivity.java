@@ -36,7 +36,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         user = auth.getCurrentUser();
 
         if(user != null){
-            startActivity(new Intent(getApplicationContext(),MainActivity.class));
+            startActivity(new Intent(getApplicationContext(),HomeActivity.class));
             finish();
         }
 
@@ -77,7 +77,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 @Override
                 public void onSuccess(AuthResult authResult) {
                     startActivity(new Intent(getApplicationContext(),MainActivity.class));
-                    finish();
                 }
             })
         .addOnFailureListener(new OnFailureListener() {
