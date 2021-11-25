@@ -52,13 +52,10 @@ class TemplateBuilderActivity : AppCompatActivity() {
         val data = dataRef.child("users").child(FirebaseAuth.getInstance().currentUser!!.uid).child("data")
         val dataTask = data.get()
             .addOnSuccessListener { dataSnapShot ->
-                //val dataMap = dataSnapShot.children //as Map<String,String>
                 var numberPerRow = 2
                 var counter = numberPerRow
                 var layout = LinearLayout(applicationContext)
                 // iterate through documents of user
-//        dataMap.forEach { (key, value) -> {
-//            println("$key = $value")
                 for(child in dataSnapShot.children){
                     // for each document create a simple card for display
                     if(counter < 1){
@@ -104,7 +101,6 @@ class TemplateBuilderActivity : AppCompatActivity() {
 
         val name = TextView(applicationContext)
         var nameText = child.key as String
-//        name.text = child.key as String
         name.setTextColor(Color.BLACK)
         name.setPadding(5, 5, 5, 5)
         layout.addView(name, layoutParams)
@@ -113,12 +109,6 @@ class TemplateBuilderActivity : AppCompatActivity() {
             val childLayout = LinearLayout(applicationContext)
             childLayout.orientation = LinearLayout.HORIZONTAL
             childLayout.background = resources.getDrawable(R.drawable.custom_rectangular_background,null)
-
-//            val dataType = TextView(applicationContext)
-//            dataType.text = gChild.key as String
-//            dataType.setTextColor(Color.BLACK)
-//            dataType.setPadding(5, 5, 5, 5)
-//            childLayout.addView(dataType, layoutParams)
 
             if(gChild.key.toString() == "type"){
                 nameText = nameText + " (" + gChild.value.toString() + ")"
@@ -134,13 +124,6 @@ class TemplateBuilderActivity : AppCompatActivity() {
             }
         }
 
-//        val dataValue = TextView(applicationContext)
-//        dataValue.setText(value as String)
-//        dataValue.setTextColor(Color.BLACK)
-//        dataValue.setPadding(5, 5, 5, 5)
-
-
-//        layout.addView(date)
         name.text = nameText
         card.addView(layout)
         card.setOnLongClickListener(longClickListener)
@@ -199,8 +182,6 @@ class TemplateBuilderActivity : AppCompatActivity() {
         var originalBackgroundColor = 0
         when(event.action) {
             DragEvent.ACTION_DRAG_STARTED -> {
-//                (v as? ImageView)?.setColorFilter(Color.RED)
-//                (v as? Button)?.setBackgroundColor(Color.BLUE)
                 onActionDragStarted(v, event)
                 true
             }
@@ -254,15 +235,11 @@ class TemplateBuilderActivity : AppCompatActivity() {
 
         layoutParams.setMargins(10, 3, 10, 10)
         dropObject.visibility = VISIBLE
-//        val item = event.clipData.getItemAt(0)
-//        val dragData = item.text
         target.setBackgroundColor(backgroundColor)
         val destination = target as LinearLayout
 
-//        displayMessageWithToast("destination_id: ${destination.id}", false)
         if (destination.id == R.id.template_builder_layout ||
                 destination.id == R.id.layout_elements) {
-//            displayMessageWithToast("destination_id: ${destination.id}")
             val owner = dropObject.parent as ViewGroup
             owner.removeView(dropObject)
             if(owner.size < 1 && (owner.id == R.id.layout_elements || owner.id == R.id.template_builder_layout)){
@@ -273,19 +250,9 @@ class TemplateBuilderActivity : AppCompatActivity() {
                 val parent = owner.parent as ViewGroup
                 parent.removeView(owner)
             }
-//            displayMessageWithToast(destination.size.toString(), false)
             if(destination.size > 0 && destination[0] is Space ){
                 destination.removeViewAt(0)
             }
-//            else if(destination.size > 0){
-//                displayMessageWithToast(destination[0].javaClass.simpleName, false)
-//            }
-//            if(destination.size > 0 && (destination[0] is Space || destination[0] is LinearLayout)){
-//                destination.removeViewAt(0)
-//            }
-//            else if(destination.size > 0){
-//                displayMessageWithToast(destination[0].javaClass.simpleName, false)
-//            }
             destination.addView(dropObject, layoutParams)
             target.invalidate()
         }
