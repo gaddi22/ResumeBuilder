@@ -122,6 +122,7 @@ class TemplateBuilderActivity : AppCompatActivity() {
 
     private val dragListener = OnDragListener{ view, event ->
         val v = event.localState as View
+        var originalBackgroundColor: Int = 0
         when(event.action) {
             DragEvent.ACTION_DRAG_STARTED -> {
                 (v as? ImageView)?.setColorFilter(Color.RED)
@@ -130,43 +131,60 @@ class TemplateBuilderActivity : AppCompatActivity() {
                 event.clipDescription.hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN)
             }
             DragEvent.ACTION_DRAG_ENTERED -> {
+                originalBackgroundColor = view.solidColor
+                view.setBackgroundColor(resources.getColor(R.color.grey,null))
                 view.invalidate()
                 true
             }
             DragEvent.ACTION_DRAG_LOCATION -> {
+                onActionDragLocation()
                 true
             }
             DragEvent.ACTION_DRAG_EXITED -> {
-                view.invalidate()
+                onActionDragExited(view, originalBackgroundColor)
                 true
             }
             DragEvent.ACTION_DROP -> {
-                v.visibility = VISIBLE
-                val item = event.clipData.getItemAt(0)
-                val dragData = item.text
-
-                val destination = view as LinearLayout
-
-                displayMessageWithToast("destination_id: ${destination.id}", false)
-                if (destination.id == R.id.template_builder_layout) {
-                    displayMessageWithToast("destination_id: ${destination.id}")
-                    val owner = v.parent as ViewGroup
-                    owner.removeView(v)
-                    destination.addView(v)
-                    (v as? ImageView)?.setColorFilter(Color.RED)
-                    (v as? ImageView)?.setBackgroundColor(Color.RED)
-
-                    view.invalidate()
-                }
+                onActionDrop(view, v, originalBackgroundColor)
                 true
             }
             DragEvent.ACTION_DRAG_ENDED -> {
-                view.invalidate()
-                v.visibility = VISIBLE
+                onActionDragEnded(view, v)
                 true
             }
             else -> false
         }
+    }
+
+    private fun onActionDragLocation() {
+        TODO("Not yet implemented")
+    }
+
+    private fun onActionDragExited(view: View, originalBackgroundColor: Int) {
+        view.setBackgroundColor(originalBackgroundColor)
+        view.invalidate()
+    }
+
+    private fun onActionDrop(target: View, dropObject: View, backgroundColor:Int) {
+        dropObject.visibility = VISIBLE
+//        val item = event.clipData.getItemAt(0)
+//        val dragData = item.text
+        target.setBackgroundColor(backgroundColor)
+        val destination = target as LinearLayout
+
+        displayMessageWithToast("destination_id: ${destination.id}", false)
+        if (destination.id == R.id.template_builder_layout) {
+            displayMessageWithToast("destination_id: ${destination.id}")
+            val owner = dropObject.parent as ViewGroup
+            owner.removeView(dropObject)
+            destination.addView(dropObject)
+            target.invalidate()
+        }
+    }
+
+    private fun onActionDragEnded(target:View, dropObject:View) {
+        target.invalidate()
+        dropObject.visibility = VISIBLE
     }
 
     private fun displayMessageWithToast(message:String, long:Boolean=true){
