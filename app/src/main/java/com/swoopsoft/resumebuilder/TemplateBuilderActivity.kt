@@ -67,35 +67,43 @@ class TemplateBuilderActivity : AppCompatActivity() {
     private fun buildTemplateObjects(elements: List<DataSnapshot>){
         // configure layout parameters
         val layoutParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f
+            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f
         )
+            .apply {
+                gravity = Gravity.CENTER_HORIZONTAL
+            }
         layoutParams.setMargins(10, 10, 10, 10)
         var numberPerRow = 2
         var counter = numberPerRow
         var layout = LinearLayout(applicationContext)
         // iterate through documents of user
-        displayMessageWithToast("before: " + resumeElements.count().toString(), false)
+//        displayMessageWithToast("before: " + resumeElements.count().toString(), false)
         for(child in elements.iterator()){
             // for each document create a simple card for display
-            if(counter < 1){
-                addLayoutToParentLayout(layout)
-                counter = numberPerRow
-            }
-            if(counter % numberPerRow == 0){
-                layout = LinearLayout(applicationContext)
-                layout.orientation = LinearLayout.HORIZONTAL
-            }
-            layout.addView(createCard(child), layoutParams)
-            counter -= 1
+            addLayoutToParentLayout(createCard(child)!!, layoutParams)
+//            if(counter < 1){
+//                addLayoutToParentLayout(layout)
+//                counter = numberPerRow
+//            }
+//            if(counter % numberPerRow == 0){
+//                layout = LinearLayout(applicationContext)
+//                layout.orientation = LinearLayout.HORIZONTAL
+//            }
+//            layout.addView(createCard(child), layoutParams)
+//            counter -= 1
         }
-        if(counter == 0 || counter % numberPerRow != 0){
-            addLayoutToParentLayout(layout)
-        }
-        displayMessageWithToast("after: " + resumeElements.count().toString(), false)
+//        if(counter == 0 || counter % numberPerRow != 0){
+//            addLayoutToParentLayout(layout)
+//        }
+//        displayMessageWithToast("after: " + resumeElements.count().toString(), false)
     }
 
     private fun addLayoutToParentLayout(layout: LinearLayout) {
         elementsLayout.addView(layout)
+    }
+
+    private fun addLayoutToParentLayout(view:View, params:LinearLayout.LayoutParams){
+        elementsLayout.addView(view, params)
     }
 
     private fun createCard(child: DataSnapshot): View? {
@@ -104,6 +112,7 @@ class TemplateBuilderActivity : AppCompatActivity() {
         card.radius = 15f
         card.cardElevation = 25f
         card.setCardBackgroundColor(Color.WHITE)
+
         val layoutParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT
         )
@@ -119,7 +128,7 @@ class TemplateBuilderActivity : AppCompatActivity() {
         name.setTextColor(Color.BLACK)
         name.setPadding(5, 5, 5, 5)
         layout.addView(name, layoutParams)
-
+//displayMessageWithToast("grandchild count: " + child.children.count().toString(), false)
         for(gChild in child.children) {
             val childLayout = LinearLayout(applicationContext)
             childLayout.orientation = LinearLayout.HORIZONTAL
@@ -244,33 +253,76 @@ class TemplateBuilderActivity : AppCompatActivity() {
     }
 
     private fun onActionDrop(target: View, dropObject: View, backgroundColor:Int) {
-        val layoutParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT
-        )
 
-        layoutParams.setMargins(10, 3, 10, 10)
         dropObject.visibility = VISIBLE
         target.setBackgroundColor(backgroundColor)
         val destination = target as LinearLayout
 
-        if (destination.id == R.id.template_builder_layout ||
-                destination.id == R.id.layout_elements) {
-            val owner = dropObject.parent as ViewGroup
-            owner.removeView(dropObject)
-            if(owner.size < 1 && (owner.id == R.id.layout_elements || owner.id == R.id.template_builder_layout)){
-                val space = Space(applicationContext)
-                space.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, spaceHeight)
-                owner.addView(space)
-            } else if (owner.size < 1){
-                val parent = owner.parent as ViewGroup
-                parent.removeView(owner)
-            }
-            if(destination.size > 0 && destination[0] is Space ){
-                destination.removeViewAt(0)
-            }
-            destination.addView(dropObject, layoutParams)
-            target.invalidate()
+        if (destination.id == R.id.template_builder_layout) {
+            dropInTemplateBuilderLayout(dropObject, destination, target)
+        } else if (destination.id == R.id.layout_elements) {
+            dropInElementsLayout(dropObject, destination, target)
         }
+    }
+
+    private fun dropInTemplateBuilderLayout(
+        dropObject: View,
+        destination: LinearLayout,
+        target: LinearLayout
+    ) {
+        val layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT
+        )
+            .apply {
+                gravity = Gravity.CENTER_HORIZONTAL
+            }
+
+        layoutParams.setMargins(10, 3, 10, 10)
+        val owner = dropObject.parent as ViewGroup
+        owner.removeView(dropObject)
+        if(owner.size < 1 && (owner.id == R.id.layout_elements || owner.id == R.id.template_builder_layout)){
+            val space = Space(applicationContext)
+            space.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, spaceHeight)
+            owner.addView(space)
+        } else if (owner.size < 1){
+            val parent = owner.parent as ViewGroup
+            parent.removeView(owner)
+        }
+        if(destination.size > 0 && destination[0] is Space ){
+            destination.removeViewAt(0)
+        }
+        destination.addView(dropObject, layoutParams)
+        target.invalidate()
+    }
+
+    private fun dropInElementsLayout(
+        dropObject: View,
+        destination: LinearLayout,
+        target: LinearLayout
+    ) {
+        val layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
+        )
+            .apply {
+                gravity = Gravity.CENTER_HORIZONTAL
+            }
+
+        layoutParams.setMargins(10, 3, 10, 10)
+        val owner = dropObject.parent as ViewGroup
+        owner.removeView(dropObject)
+        if(owner.size < 1 && (owner.id == R.id.layout_elements || owner.id == R.id.template_builder_layout)){
+            val space = Space(applicationContext)
+            space.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, spaceHeight)
+            owner.addView(space)
+        } else if (owner.size < 1){
+            val parent = owner.parent as ViewGroup
+            parent.removeView(owner)
+        }
+        if(destination.size > 0 && destination[0] is Space ){
+            destination.removeViewAt(0)
+        }
+        destination.addView(dropObject, layoutParams)
+        target.invalidate()
     }
 
     private fun onActionDragEnded(target:View, dropObject:View) {
