@@ -29,7 +29,6 @@ class TemplateBuilderActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_template_builder)
 
-//        resumeElements = emptyList()
 
         templateLayout = findViewById(R.id.template_builder_layout)
         elementsLayout = findViewById(R.id.layout_elements)
@@ -54,18 +53,7 @@ class TemplateBuilderActivity : AppCompatActivity() {
         val data = dataRef.child("users").child(FirebaseAuth.getInstance().currentUser!!.uid).child("data")
         val dataTask = data.get()
             .addOnSuccessListener { dataSnapShot ->
-//                resumeElements = dataSnapShot.children
-//                val result: List<String> = ArrayList()
-//                dataSnapShot.children.forEach(resumeElements::add)
-//                for (child in dataSnapShot.children){
-//                    resumeElements.plus(child)
-//                }
-//                buildTemplateObjects(dataSnapShot.children.iterator())
-//                while (dataSnapShot.children.iterator().hasNext()){
-//                    resumeElements.plus(dataSnapShot.children.iterator().next())
-//                }
                 for(child in dataSnapShot.children){
-//                    resumeElements.plus(child)
                     resumeElements.add(child)
                 }
                 buildTemplateObjects(resumeElements)
@@ -85,7 +73,6 @@ class TemplateBuilderActivity : AppCompatActivity() {
         var numberPerRow = 2
         var counter = numberPerRow
         var layout = LinearLayout(applicationContext)
-//        val elements = resumeElements.iterator()
         // iterate through documents of user
         displayMessageWithToast("before: " + resumeElements.count().toString(), false)
         for(child in elements.iterator()){
@@ -299,20 +286,6 @@ class TemplateBuilderActivity : AppCompatActivity() {
             Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT).show()
         }
     }
-
-//    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
-//        R.id.action_save -> {
-//            onSaveActionSelected(item)
-//            true
-//        }
-//        R.id.action_cancel -> {
-//            onCancelActionSelected(item)
-//            true
-//        }
-//        else -> {
-//            super.onOptionsItemSelected(item)
-//        }
-//    }
 
     private val onSaveActionSelected = fun (item: View) {
         displayMessageWithToast("save for " + item.id)
