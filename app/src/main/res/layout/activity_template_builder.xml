@@ -6,6 +6,8 @@
     android:layout_height="match_parent"
     tools:context=".TemplateBuilderActivity">
 
+
+
     <LinearLayout
         android:id="@+id/template_builder_main_layout"
         android:layout_width="match_parent"
@@ -19,12 +21,25 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
+        <include
+            layout="@layout/menu_save_reset"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="2"
             android:layout_marginBottom="3dp"
             android:background="@drawable/drop_shadow"
+
+            android:scrollbars="vertical"
+            android:fadeScrollbars="true"
+            android:scrollbarFadeDuration="1300"
+            android:scrollbarAlwaysDrawVerticalTrack="true"
+            android:scrollbarSize="7dp"
+            android:scrollbarThumbVertical="@drawable/scrollbar_gradient"
+
             tools:ignore="SpeakableTextPresentCheck">
 
             <LinearLayout
@@ -51,6 +66,14 @@
             android:layout_weight="1"
             android:layout_marginTop="3dp"
             android:background="@drawable/drop_shadow"
+
+            android:scrollbars="vertical"
+            android:fadeScrollbars="false"
+            android:scrollbarFadeDuration="0"
+            android:scrollbarAlwaysDrawVerticalTrack="true"
+            android:scrollbarSize="17dp"
+            android:scrollbarThumbVertical="@drawable/scrollbar_gradient"
+
             tools:ignore="SpeakableTextPresentCheck">
 
             <LinearLayout
