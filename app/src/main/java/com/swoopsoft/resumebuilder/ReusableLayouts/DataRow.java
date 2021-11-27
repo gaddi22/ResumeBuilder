@@ -28,9 +28,14 @@ public class DataRow {
     private Button remove;
     private Context context;
     private String type;
+    private String dataName;
+    private DataObject obj;
 
     public DataRow(DataActivity parentActivity, DataObject data, String dataName, Context context){
 
+
+        this.dataName = dataName;
+        this.obj = data;
         type = data.getType();
         this.context = context;
         //build card view
@@ -54,17 +59,18 @@ public class DataRow {
         LinearLayout.LayoutParams leftColumnParam = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT,
-                parentActivity.getResources().getDimension(R.dimen.data_key_weight)
+                Float.valueOf(parentActivity.getResources().getString(R.string.data_key_weight))
         );
+
         LinearLayout.LayoutParams centerColumnParam = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT,
-                parentActivity.getResources().getDimension(R.dimen.data_values_weight)
+                Float.valueOf(parentActivity.getResources().getString(R.string.data_values_weight))
         );
         LinearLayout.LayoutParams rightColumnParam = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT,
-                parentActivity.getResources().getDimension(R.dimen.data_button_weight)
+                Float.valueOf(parentActivity.getResources().getString(R.string.data_button_weight))
         );
 
         //build data key name
@@ -77,6 +83,7 @@ public class DataRow {
         valLayout = new LinearLayout(context);
         valLayout.setLayoutParams(centerColumnParam);
         valLayout.setLayoutMode(LinearLayout.VERTICAL);
+        values = new ArrayList<>();
         buildValues(valLayout, context, data);
 
         //build button
@@ -88,6 +95,9 @@ public class DataRow {
         row.addView(key);
         row.addView(valLayout);
         row.addView(remove);
+
+        //put row into card
+        container.addView(row);
     }
 
     private void buildValues(LinearLayout linearLayout, Context context, DataObject data){
@@ -131,11 +141,15 @@ public class DataRow {
     }
 
     public Button getButton(){
-        //returns button, used for pareant's click detection
+        //returns button, used for parent's click detection
         return remove;
     }
 
     public String getType(){
         return type;
     }
+
+    public String getDataName(){ return dataName; }
+
+    public DataObject getObj(){ return obj; }
 }
