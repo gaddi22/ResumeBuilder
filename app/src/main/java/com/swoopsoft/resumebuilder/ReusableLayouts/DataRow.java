@@ -1,5 +1,7 @@
 package com.swoopsoft.resumebuilder.ReusableLayouts;
 
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
@@ -50,13 +52,13 @@ public class DataRow {
         container.setContentPadding(padding,padding,padding,padding);
         container.setRadius(radius);
         container.setUseCompatPadding(true);
-        container.setMinimumHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
+        container.setMinimumHeight(WRAP_CONTENT);
         container.setMinimumWidth(ViewGroup.LayoutParams.MATCH_PARENT);
 
         //build row linear layout
         row = new LinearLayout(context);
         row.setLayoutMode(LinearLayout.HORIZONTAL);
-        row.setMinimumHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
+        row.setMinimumHeight(WRAP_CONTENT);
         row.setMinimumWidth(ViewGroup.LayoutParams.MATCH_PARENT);
 
         //put row into card
@@ -65,20 +67,20 @@ public class DataRow {
         //build column params
         LinearLayout.LayoutParams leftColumnParam = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
+                WRAP_CONTENT,
                 //Float.valueOf(parentActivity.getResources().getString(R.string.data_key_weight))
                 1
         );
 
         LinearLayout.LayoutParams centerColumnParam = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
+                WRAP_CONTENT,
                 //Float.valueOf(parentActivity.getResources().getString(R.string.data_values_weight))
                 1
         );
         LinearLayout.LayoutParams rightColumnParam = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
+                WRAP_CONTENT,
                 //Float.valueOf(parentActivity.getResources().getString(R.string.data_button_weight))
                 1
         );
@@ -97,7 +99,7 @@ public class DataRow {
         valLayout.setLayoutParams(centerColumnParam);
         valLayout.setLayoutMode(LinearLayout.VERTICAL);
         values = new ArrayList<>();
-        buildValues(valLayout, context, data);
+        buildValues(valLayout, context, data, centerColumnParam);
 
         //build button
         remove = new Button(context);
@@ -112,12 +114,11 @@ public class DataRow {
 
     }
 
-    private void buildValues(LinearLayout linearLayout, Context context, DataObject data){
+    private void buildValues(LinearLayout linearLayout, Context context, DataObject data, LinearLayout.LayoutParams outerParams){
         if(TextUtils.equals(data.getType(), "Text")){
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    1
+                    WRAP_CONTENT
             );
 
             TextView textData = new TextView(context);
@@ -136,20 +137,19 @@ public class DataRow {
         if(TextUtils.equals(data.getType(), "Image")){
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    1
+                    WRAP_CONTENT
             );
 
             ImageView image = new ImageView(context);
-            linearLayout.addView(image);
             image.setLayoutParams(params);
+            linearLayout.addView(image);
             image.setMaxHeight(linearLayout.getHeight());
             Picasso.get().load((String)data.value).into(image);
             image.setScaleType(ImageView.ScaleType.FIT_CENTER);
-
             values.add(image);
 
-
+            outerParams.height = 300;
+            linearLayout.setLayoutParams(outerParams);
         }
     }
 
