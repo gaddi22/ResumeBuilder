@@ -1,6 +1,10 @@
 package com.swoopsoft.resumebuilder.ReusableLayouts;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.ColorFilter;
+import android.graphics.PorterDuff;
+import android.text.Layout;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -55,32 +59,41 @@ public class DataRow {
         row.setMinimumHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
         row.setMinimumWidth(ViewGroup.LayoutParams.MATCH_PARENT);
 
+        //put row into card
+        container.addView(row);
+
         //build column params
         LinearLayout.LayoutParams leftColumnParam = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT,
-                Float.valueOf(parentActivity.getResources().getString(R.string.data_key_weight))
+                //Float.valueOf(parentActivity.getResources().getString(R.string.data_key_weight))
+                1
         );
 
         LinearLayout.LayoutParams centerColumnParam = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT,
-                Float.valueOf(parentActivity.getResources().getString(R.string.data_values_weight))
+                //Float.valueOf(parentActivity.getResources().getString(R.string.data_values_weight))
+                1
         );
         LinearLayout.LayoutParams rightColumnParam = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT,
-                Float.valueOf(parentActivity.getResources().getString(R.string.data_button_weight))
+                //Float.valueOf(parentActivity.getResources().getString(R.string.data_button_weight))
+                1
         );
 
         //build data key name
         key = new TextView(context);
+        row.addView(key);
         key.setLayoutParams(leftColumnParam);
         key.setText(dataName);
         key.setTextAppearance(android.R.style.TextAppearance_Medium);
 
         //build values layout
         valLayout = new LinearLayout(context);
+        row.addView(valLayout);
+        valLayout.setBackgroundColor(0xFFEEEEEE);
         valLayout.setLayoutParams(centerColumnParam);
         valLayout.setLayoutMode(LinearLayout.VERTICAL);
         values = new ArrayList<>();
@@ -88,27 +101,29 @@ public class DataRow {
 
         //build button
         remove = new Button(context);
+        row.addView(remove);
         remove.setLayoutParams(rightColumnParam);
         remove.setOnClickListener(parentActivity);
+        remove.setText(parentActivity.getResources().getString(R.string.remove_item));
+        remove.getBackground().setColorFilter(Color.RED, PorterDuff.Mode.MULTIPLY);
+        remove.setTextColor(Color.WHITE);
+        remove.setTextAlignment(View.TEXT_ALIGNMENT_VIEW_START);
 
-        //add views to row
-        row.addView(key);
-        row.addView(valLayout);
-        row.addView(remove);
 
-        //put row into card
-        container.addView(row);
     }
 
     private void buildValues(LinearLayout linearLayout, Context context, DataObject data){
         if(TextUtils.equals(data.getType(), "Text")){
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    1
             );
 
             TextView textData = new TextView(context);
+            linearLayout.addView(textData);
             textData.setLayoutParams(params);
+            textData.setTextAppearance(android.R.style.TextAppearance_Medium);
             values.add(textData);
             try {
                 textData.setText((String) data.getValue());
@@ -116,21 +131,24 @@ public class DataRow {
             catch(Exception e){
                 Log.d("DataRow","Invalid data from Text Object, datatype: " + data.getValue().getClass().getName());
             }
-            linearLayout.addView(textData);
+
         }
         if(TextUtils.equals(data.getType(), "Image")){
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    1
             );
 
             ImageView image = new ImageView(context);
+            linearLayout.addView(image);
             image.setLayoutParams(params);
+            image.setMaxHeight(linearLayout.getHeight());
             Picasso.get().load((String)data.value).into(image);
             image.setScaleType(ImageView.ScaleType.FIT_CENTER);
 
             values.add(image);
-            linearLayout.addView(image);
+
 
         }
     }

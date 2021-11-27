@@ -18,8 +18,10 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.swoopsoft.resumebuilder.ReusableLayouts.DataRow;
@@ -37,6 +39,7 @@ public class DataActivity extends AppCompatActivity implements View.OnClickListe
     private LinearLayout mainLayout;
     private ArrayList<DataRow> rows;
     private FirebaseUser user;
+    DatabaseReference userRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +62,27 @@ public class DataActivity extends AppCompatActivity implements View.OnClickListe
 
         Toast.makeText(getApplicationContext(),"Loading Data",Toast.LENGTH_LONG).show();
 
-        Task<DataSnapshot> getUserObjTask = FirebaseDatabase.getInstance().getReference().child("users/"+user.getUid()).get();
+        //get references to user's database
+        userRef = FirebaseDatabase.getInstance().getReference().child("users/"+user.getUid());
+
+        loadValues();
+
+        userRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                mainLayout.removeAllViews();
+                loadValues();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void loadValues() {
+        Task<DataSnapshot> getUserObjTask = userRef.get();
         DataActivity activityRef = this;
         getUserObjTask.addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
             @Override
@@ -73,13 +96,11 @@ public class DataActivity extends AppCompatActivity implements View.OnClickListe
                         DataRow row = new DataRow( activityRef, entry.getValue(), entry.getKey(), getApplicationContext());
                         rows.add(row);
                         mainLayout.addView(row.getView());
+                        Toast.makeText(getApplicationContext(),"Loading Done",Toast.LENGTH_LONG).show();
                     }
                 }
             }
         });
-
-
-
     }
 
     @Override
