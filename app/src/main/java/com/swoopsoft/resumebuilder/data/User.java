@@ -1,9 +1,13 @@
 package com.swoopsoft.resumebuilder.data;
 
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -14,25 +18,25 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class User {
-    public String uid;
     public String email;
-    public Map data;    //attribute name, object
-    public DatabaseReference userRef;
+    public Map<String,DataObject> data;    //attribute name, object
 
-    public User(String uid){
-        this.uid = uid;
-        data = new HashMap();
-        userRef = FirebaseDatabase.getInstance().getReference().child("users").child(uid);
+    public User(String email, Map data){
+        this.email = email;
+        this.data = data;
     }
 
-    public void addData(String name,DataObject value){
-        data.put(name, value);
-        userRef.child("data").child(name).setValue(value);
+    public User(){
+        email = "";
+        data = new HashMap<>();
     }
 
-    public HashMap getData(){
-        DataSnapshot snapshot = userRef.child("data").get().getResult();
-        return snapshot.getValue(HashMap.class);
+    public Map getData(){
+        return data;
+    }
+
+    public String getEmail(){
+        return email;
     }
 
 }

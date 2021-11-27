@@ -35,4 +35,8 @@
     <string name="obj_data">Block Value</string>
     <string name="submit">Submit</string>
 
+    <string name="data_key_weight">16</string>
+    <string name="data_values_weight">40</string>
+    <string name="data_button_weight">1</string>
+
 </resources>

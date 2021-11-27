@@ -14,8 +14,10 @@ import android.opengl.Visibility;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -25,17 +27,23 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.swoopsoft.resumebuilder.data.DataObject;
 import com.swoopsoft.resumebuilder.data.User;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,7 +54,55 @@ public class CreateDataActivity extends AppCompatActivity implements View.OnClic
     private ImageView image;
     private Spinner dataType;
     private FirebaseUser user;
-    private Uri imgurl;
+    private Uri imageurl;
+    private Uri cloudImg;
+
+    //Activity laucher for image selector
+    ActivityResultLauncher<String>  selectImageLauncher = registerForActivityResult(new ActivityResultContracts.GetContent(),
+            new ActivityResultCallback<Uri>() {
+                @Override
+                public void onActivityResult(Uri result) {
+                    image.setImageURI(result);
+                    imageurl = result;
+
+                    uploadImage();
+                }
+            });
+
+    private void uploadImage(){
+        //upload image to firebase and get download link
+        StorageReference imageLocation = FirebaseStorage.getInstance().getReference()
+                .child(user.getUid()).child("images/"+imageurl.getLastPathSegment());
+        UploadTask uploadTask = imageLocation.putFile(imageurl);
+        Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+            @Override
+            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                if (!task.isSuccessful()) {
+                    throw task.getException();
+                }
+
+                // Continue with the task to get the download URL
+                return imageLocation.getDownloadUrl();
+            }
+        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+            @Override
+            public void onComplete(@NonNull Task<Uri> task) {
+                if (task.isSuccessful()) {
+                    //add image data object to user
+                    cloudImg = task.getResult();
+                } else {
+                    // Handle failures
+                    Toast.makeText(getApplicationContext(),"Failed to upload image: " + task.getException().getMessage(),Toast.LENGTH_LONG).show();
+                }
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                e.printStackTrace();
+            }
+        });
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,13 +122,22 @@ public class CreateDataActivity extends AppCompatActivity implements View.OnClic
         dataType = findViewById(R.id.data_type);
         submit = findViewById(R.id.submit_obj);
 
+        image.setVisibility(GONE);
+        submit.setVisibility(GONE);
+        textVal.setVisibility(GONE);
+        dataName.setVisibility(GONE);
+
         image.setOnClickListener(this);
         submit.setOnClickListener(this);
-        dataType.setOnTouchListener(new View.OnTouchListener() {
+        dataType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public boolean onTouch(View v, MotionEvent event) {
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 adjustUI();
-                return true;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
             }
         });
 
@@ -80,11 +145,77 @@ public class CreateDataActivity extends AppCompatActivity implements View.OnClic
 
     private void addText(){
         //add text data object to user
-        new User(user.getUid()).addData(dataName.getText().toString(), new DataObject("String",textVal.getText().toString()));
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("users/"+user.getUid());
+
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.exists()){
+                    DataObject dataEntry = new DataObject(dataType.getSelectedItem().toString(),textVal.getText().toString());
+
+                    HashMap dataMap = (HashMap) snapshot.child("data").getValue();
+                    if(dataMap == null){
+                        dataMap = new HashMap();
+                    }
+
+                    dataMap.put(dataName.getText().toString(),dataEntry);
+                    userRef.child("data").setValue(dataMap).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            finish();
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(getApplicationContext(),"Failed to submit data: " + e.getMessage(),Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(getApplicationContext(),"Failed to submit data: " + error.getMessage(),Toast.LENGTH_LONG).show();
+            }
+        });
+
     }
 
     private void addImage(){
-        new User(user.getUid()).addData(dataName.getText().toString(), new DataObject("Image",imgurl.toString()));
+        //add image object to user
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("users/"+user.getUid());
+
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.exists()){
+                    DataObject dataEntry = new DataObject(dataType.getSelectedItem().toString(),cloudImg.toString());
+
+                    HashMap dataMap = (HashMap) snapshot.child("data").getValue();
+                    if(dataMap == null){
+                        dataMap = new HashMap();
+                    }
+
+                    dataMap.put(dataName.getText().toString(),dataEntry);
+                    userRef.child("data").setValue(dataMap).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            finish();
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(getApplicationContext(),"Failed to submit data: " + e.getMessage(),Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(getApplicationContext(),"Failed to submit data: " + error.getMessage(),Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     @Override
@@ -114,7 +245,7 @@ public class CreateDataActivity extends AppCompatActivity implements View.OnClic
             }
         }
         if(v == image){
-            imgurl = selectImage(image);
+            selectImage(image);
         }
     }
 
@@ -128,7 +259,7 @@ public class CreateDataActivity extends AppCompatActivity implements View.OnClic
 
         }
         else if(dataType.getSelectedItem().toString().equals("Image")) {
-            if (TextUtils.isEmpty(imgurl.toString())) {
+            if (TextUtils.isEmpty(cloudImg.toString())) {
                 Toast.makeText(getApplicationContext(), "No image selected", Toast.LENGTH_LONG).show();
                 return true;
             }
@@ -144,68 +275,61 @@ public class CreateDataActivity extends AppCompatActivity implements View.OnClic
         }
     }
 
-    private Uri selectImage(ImageView view) {
+    public Uri selectImage(ImageView view) {
         /*
         Selects an image from local storage and adds it to the provided image view.
-        Method then uploads the image to firebase stroage and returns the download link.
+        Method then uploads the image to firebase storage and returns the download link.
          */
 
-        final Uri[] result = new Uri[1];
-
-        //select image from local storage
-        ActivityResultLauncher<String>  selectImageLauncher = registerForActivityResult(new ActivityResultContracts.GetContent(),
-                new ActivityResultCallback<Uri>() {
-            @Override
-            public void onActivityResult(Uri result) {
-                view.setImageURI(result);
-            }
-        });
+        view = image;
         selectImageLauncher.launch("image/*");
 
-        //upload image to firebase and get download link
-        StorageReference imageLocation = FirebaseStorage.getInstance().getReference()
-                .child(user.getUid()).child("images/"+imgurl.getLastPathSegment());
-        UploadTask uploadTask = imageLocation.putFile(imgurl);
-        Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-            @Override
-            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                if (!task.isSuccessful()) {
-                    throw task.getException();
-                }
-
-                // Continue with the task to get the download URL
-                return imageLocation.getDownloadUrl();
-            }
-        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-            @Override
-            public void onComplete(@NonNull Task<Uri> task) {
-                if (task.isSuccessful()) {
-                    //add image data object to user
-                    Uri downloadUri = task.getResult();
-                    result[0] = task.getResult();
-                } else {
-                    // Handle failures
-                    Toast.makeText(getApplicationContext(),"Failed to upload image: " + task.getException().getMessage(),Toast.LENGTH_LONG).show();
-                }
-            }
-        });
-
-        return result[0];
+        //wait for task completion
+        //while(cloudImg == null);
+        return cloudImg;
     }// end selectImage();
 
     private void adjustUI() {
         if(dataType.getSelectedItem().toString().equals("Text")){
             image.setVisibility(GONE);
+            textVal.setVisibility(View.VISIBLE);
+            dataName.setVisibility(View.VISIBLE);
+            submit.setVisibility(View.VISIBLE);
         }
         else if(dataType.getSelectedItem().toString().equals("Image")){
             textVal.setVisibility(GONE);
+            image.setVisibility(View.VISIBLE);
+            dataName.setVisibility(View.VISIBLE);
+            submit.setVisibility(View.VISIBLE);
+        }
+        else if(dataType.getSelectedItem().toString().equals("None")){
+            image.setVisibility(GONE);
+            submit.setVisibility(GONE);
+            textVal.setVisibility(GONE);
+            dataName.setVisibility(GONE);
         }
     }
 
     private boolean unique() {
         DatabaseReference dataRef = FirebaseDatabase.getInstance().getReference().child("users").child(user.getUid()).child("data");
-        Map dataMap = (Map) dataRef.get();
-        if(dataMap.containsKey(dataName.getText().toString())){
+        Task<DataSnapshot> getUserData = dataRef.get();
+        Map[] dataMap = new Map[1];
+        dataMap[0] = new HashMap();
+        getUserData.addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DataSnapshot> task) {
+                if(task.isSuccessful()){
+                    dataMap[0] = (HashMap) task.getResult().getValue();
+                }
+                else{
+                    Toast.makeText(getApplicationContext(),"Could not submit data: "+task.getException().getMessage(),Toast.LENGTH_LONG).show();
+                    Log.d("CreateDataActivity","Could not submit data: "+task.getException().getMessage());
+                }
+            }
+        });
+
+        while(!getUserData.isComplete());
+        if(dataMap[0].containsKey(dataName.getText().toString())){
             return false;
         }
         else return true;
