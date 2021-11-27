@@ -5,11 +5,8 @@ import android.os.Bundle
 import android.content.ClipData
 import android.content.ClipDescription
 import android.graphics.Color
-import android.view.DragEvent
-import android.view.MotionEvent
-import android.view.View
+import android.view.*
 import android.view.View.*
-import android.view.ViewGroup
 import android.widget.*
 import androidx.cardview.widget.CardView
 import androidx.core.view.get
@@ -23,60 +20,91 @@ class TemplateBuilderActivity : AppCompatActivity() {
     private lateinit var templateLayout: LinearLayout
     private lateinit var elementsLayout: LinearLayout
     private lateinit var mainLayout: LinearLayout
+    private lateinit var saveButton: Button
+    private lateinit var resetButton:Button
+    private val resumeElements: ArrayList<DataSnapshot> = ArrayList()
+    private val spaceHeight = 1000
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_template_builder)
 
+//        resumeElements = emptyList()
+
         templateLayout = findViewById(R.id.template_builder_layout)
         elementsLayout = findViewById(R.id.layout_elements)
         mainLayout = findViewById(R.id.template_builder_main_layout)
+        saveButton = findViewById(R.id.btnSaveTemplate)
+        resetButton = findViewById(R.id.btnResetTemplate)
 
-        buildTemplateObjects(elementsLayout)
+        getTemplateObjects(elementsLayout)
 
         templateLayout.setOnDragListener(dragListener)
         elementsLayout.setOnDragListener(dragListener)
         mainLayout.setOnDragListener(dragListener)
 
+        saveButton.setOnClickListener(onSaveActionSelected)
+        resetButton.setOnClickListener(onResetActionSelected)
+
     }
 
-    private fun buildTemplateObjects(elementsLayout: LinearLayout?) {
-        // configure layout parameters
-        val layoutParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f
-        )
-        layoutParams.setMargins(10, 10, 10, 10)
-
+    private fun getTemplateObjects(elementsLayout: LinearLayout?) {
         // connect to Firebase
         val dataRef = FirebaseDatabase.getInstance().reference
         val data = dataRef.child("users").child(FirebaseAuth.getInstance().currentUser!!.uid).child("data")
         val dataTask = data.get()
             .addOnSuccessListener { dataSnapShot ->
-                var numberPerRow = 2
-                var counter = numberPerRow
-                var layout = LinearLayout(applicationContext)
-                // iterate through documents of user
+//                resumeElements = dataSnapShot.children
+//                val result: List<String> = ArrayList()
+//                dataSnapShot.children.forEach(resumeElements::add)
+//                for (child in dataSnapShot.children){
+//                    resumeElements.plus(child)
+//                }
+//                buildTemplateObjects(dataSnapShot.children.iterator())
+//                while (dataSnapShot.children.iterator().hasNext()){
+//                    resumeElements.plus(dataSnapShot.children.iterator().next())
+//                }
                 for(child in dataSnapShot.children){
-                    // for each document create a simple card for display
-                    if(counter < 1){
-                        addLayoutToParentLayout(layout)
-                        counter = numberPerRow
-                    }
-                    if(counter % numberPerRow == 0){
-                        layout = LinearLayout(applicationContext)
-                        layout.orientation = LinearLayout.HORIZONTAL
-                    }
-                    layout.addView(createCard(child), layoutParams)
-                    counter -= 1
+//                    resumeElements.plus(child)
+                    resumeElements.add(child)
                 }
-                if(counter % numberPerRow != 0){
-                    addLayoutToParentLayout(layout)
-                }
+                buildTemplateObjects(resumeElements)
             }
             .addOnFailureListener{
 
             }
 
+    }
+
+    private fun buildTemplateObjects(elements: List<DataSnapshot>){
+        // configure layout parameters
+        val layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f
+        )
+        layoutParams.setMargins(10, 10, 10, 10)
+        var numberPerRow = 2
+        var counter = numberPerRow
+        var layout = LinearLayout(applicationContext)
+//        val elements = resumeElements.iterator()
+        // iterate through documents of user
+        displayMessageWithToast("before: " + resumeElements.count().toString(), false)
+        for(child in elements.iterator()){
+            // for each document create a simple card for display
+            if(counter < 1){
+                addLayoutToParentLayout(layout)
+                counter = numberPerRow
+            }
+            if(counter % numberPerRow == 0){
+                layout = LinearLayout(applicationContext)
+                layout.orientation = LinearLayout.HORIZONTAL
+            }
+            layout.addView(createCard(child), layoutParams)
+            counter -= 1
+        }
+        if(counter == 0 || counter % numberPerRow != 0){
+            addLayoutToParentLayout(layout)
+        }
+        displayMessageWithToast("after: " + resumeElements.count().toString(), false)
     }
 
     private fun addLayoutToParentLayout(layout: LinearLayout) {
@@ -244,7 +272,7 @@ class TemplateBuilderActivity : AppCompatActivity() {
             owner.removeView(dropObject)
             if(owner.size < 1 && (owner.id == R.id.layout_elements || owner.id == R.id.template_builder_layout)){
                 val space = Space(applicationContext)
-                space.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 200)
+                space.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, spaceHeight)
                 owner.addView(space)
             } else if (owner.size < 1){
                 val parent = owner.parent as ViewGroup
@@ -270,5 +298,40 @@ class TemplateBuilderActivity : AppCompatActivity() {
         else {
             Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT).show()
         }
+    }
+
+//    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
+//        R.id.action_save -> {
+//            onSaveActionSelected(item)
+//            true
+//        }
+//        R.id.action_cancel -> {
+//            onCancelActionSelected(item)
+//            true
+//        }
+//        else -> {
+//            super.onOptionsItemSelected(item)
+//        }
+//    }
+
+    private val onSaveActionSelected = fun (item: View) {
+        displayMessageWithToast("save for " + item.id)
+    }
+
+    private val onResetActionSelected = fun (item: View) {
+        resetResumeLayout()
+        clearTemplateObjects()
+        buildTemplateObjects(resumeElements)
+    }
+
+    private fun resetResumeLayout() {
+        templateLayout.removeAllViews()
+        val space = Space(applicationContext)
+        space.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, spaceHeight)
+        templateLayout.addView(space)
+    }
+
+    private fun clearTemplateObjects() {
+        elementsLayout.removeAllViews()
     }
 }

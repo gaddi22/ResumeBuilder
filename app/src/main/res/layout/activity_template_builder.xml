@@ -6,6 +6,8 @@
     android:layout_height="match_parent"
     tools:context=".TemplateBuilderActivity">
 
+
+
     <LinearLayout
         android:id="@+id/template_builder_main_layout"
         android:layout_width="match_parent"
@@ -18,6 +20,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
+
+        <include
+            layout="@layout/menu_save_reset"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
         <ScrollView
             android:layout_width="match_parent"
