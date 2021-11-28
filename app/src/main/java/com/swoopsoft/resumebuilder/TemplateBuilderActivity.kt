@@ -14,6 +14,10 @@ import androidx.core.view.size
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.FirebaseDatabase
+import com.squareup.picasso.Picasso
+import com.swoopsoft.resumebuilder.data.DataObject
+import com.swoopsoft.resumebuilder.data.User
+import java.util.HashMap
 
 class TemplateBuilderActivity : AppCompatActivity() {
 
@@ -22,7 +26,7 @@ class TemplateBuilderActivity : AppCompatActivity() {
     private lateinit var mainLayout: LinearLayout
     private lateinit var saveButton: Button
     private lateinit var resetButton:Button
-    private val resumeElements: ArrayList<DataSnapshot> = ArrayList()
+    private val resumeElements: ArrayList<MutableMap.MutableEntry<String?, DataObject?>>  = ArrayList()
     private val spaceHeight = 1000
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,22 +54,26 @@ class TemplateBuilderActivity : AppCompatActivity() {
     private fun getTemplateObjects(elementsLayout: LinearLayout?) {
         // connect to Firebase
         val dataRef = FirebaseDatabase.getInstance().reference
-        val data = dataRef.child("users").child(FirebaseAuth.getInstance().currentUser!!.uid).child("data")
+        val data = FirebaseDatabase.getInstance().reference.child("users/" + FirebaseAuth.getInstance().currentUser!!.uid)
+
+        //get references to user's database
         val dataTask = data.get()
             .addOnSuccessListener { dataSnapShot ->
-                for(child in dataSnapShot.children){
-                    resumeElements.add(child)
+                val userObj: User? = dataSnapShot.getValue(User::class.java)
+
+                val dataMap: HashMap<String?, DataObject?> = userObj?.getData() as HashMap<String?, DataObject?>
+
+                for (dataObject in dataMap) {
+                    resumeElements.add(dataObject)
                 }
                 buildTemplateObjects(resumeElements)
             }
             .addOnFailureListener{
 
             }
-
     }
 
-    private fun buildTemplateObjects(elements: List<DataSnapshot>){
-        // configure layout parameters
+    private fun buildTemplateObjects(dataList: ArrayList<MutableMap.MutableEntry<String?, DataObject?>>){
         val layoutParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f
         )
@@ -73,85 +81,89 @@ class TemplateBuilderActivity : AppCompatActivity() {
                 gravity = Gravity.CENTER_HORIZONTAL
             }
         layoutParams.setMargins(10, 10, 10, 10)
-        var numberPerRow = 2
-        var counter = numberPerRow
-        var layout = LinearLayout(applicationContext)
-        // iterate through documents of user
-//        displayMessageWithToast("before: " + resumeElements.count().toString(), false)
-        for(child in elements.iterator()){
-            // for each document create a simple card for display
-            addLayoutToParentLayout(createCard(child)!!, layoutParams)
-//            if(counter < 1){
-//                addLayoutToParentLayout(layout)
-//                counter = numberPerRow
-//            }
-//            if(counter % numberPerRow == 0){
-//                layout = LinearLayout(applicationContext)
-//                layout.orientation = LinearLayout.HORIZONTAL
-//            }
-//            layout.addView(createCard(child), layoutParams)
-//            counter -= 1
+        for((key, value) in dataList){
+            addLayoutToElementsLayout(createCard(value, key)!!, layoutParams)
         }
-//        if(counter == 0 || counter % numberPerRow != 0){
-//            addLayoutToParentLayout(layout)
-//        }
-//        displayMessageWithToast("after: " + resumeElements.count().toString(), false)
     }
 
-    private fun addLayoutToParentLayout(layout: LinearLayout) {
-        elementsLayout.addView(layout)
-    }
-
-    private fun addLayoutToParentLayout(view:View, params:LinearLayout.LayoutParams){
+    private fun addLayoutToElementsLayout(view:View, params:LinearLayout.LayoutParams){
         elementsLayout.addView(view, params)
     }
 
-    private fun createCard(child: DataSnapshot): View? {
+    private fun createCard(child: DataObject?, key: String?): View? {
+        val card = getCard()
+        val layoutParams = getLayoutParamsForCardContents()
+        val imageLayoutParams = getImageLayoutParams()
+        val layout = getCardLayout()
+        val childLayout = getChildLayout()
+        val name = getTextView(key!!, child!!.getType())
+        layout.addView(name, layoutParams)
+        if (child.getType().lowercase() == "text") {
+            childLayout.addView(getTextView(child.getValue() as String, ""))
+        } else {
+            childLayout.addView(getImageView(child), imageLayoutParams)
+        }
+        layout.addView(childLayout)
+        card.addView(layout)
+        return card
+    }
+
+    private fun getCard():CardView{
         val card = CardView(applicationContext)
         card.setPadding(3, 3, 3, 3)
         card.radius = 15f
         card.cardElevation = 25f
         card.setCardBackgroundColor(Color.WHITE)
+        card.setOnLongClickListener(longClickListener)
+        return card
+    }
 
+    private fun getLayoutParamsForCardContents():LinearLayout.LayoutParams {
         val layoutParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT
         )
 
         layoutParams.setMargins(10, 3, 10, 3)
+        return layoutParams
+    }
 
+    private fun getImageLayoutParams():LinearLayout.LayoutParams {
+        val layoutParams = LinearLayout.LayoutParams(
+            150, 150
+        )
+
+        layoutParams.setMargins(3, 3, 3, 3)
+        return layoutParams
+    }
+
+    private fun getCardLayout():LinearLayout {
         val layout = LinearLayout(applicationContext)
         layout.orientation = LinearLayout.VERTICAL
         layout.setPadding(2, 2, 2, 2)
+        return layout
+    }
 
-        val name = TextView(applicationContext)
-        var nameText = child.key as String
-        name.setTextColor(Color.BLACK)
-        name.setPadding(5, 5, 5, 5)
-        layout.addView(name, layoutParams)
-//displayMessageWithToast("grandchild count: " + child.children.count().toString(), false)
-        for(gChild in child.children) {
-            val childLayout = LinearLayout(applicationContext)
-            childLayout.orientation = LinearLayout.HORIZONTAL
-            childLayout.background = resources.getDrawable(R.drawable.custom_rectangular_background,null)
+    private fun getChildLayout():LinearLayout {
+        val childLayout = LinearLayout(applicationContext)
+        childLayout.orientation = LinearLayout.HORIZONTAL
+        childLayout.background = resources.getDrawable(R.drawable.custom_rectangular_background,null)
+        return childLayout
+    }
 
-            if(gChild.key.toString() == "type"){
-                nameText = nameText + " (" + gChild.value.toString() + ")"
-            } else {
+    private fun getTextView(text:String, dataType:String):TextView {
+        val textView = TextView(applicationContext)
+        var nameText = if (dataType.isNotBlank()) "$text ($dataType)" else text
+        textView.setTextColor(Color.BLACK)
+        textView.setPadding(5, 5, 5, 5)
+        textView.text = nameText
+        return textView
+    }
 
-                val dataValue = TextView(applicationContext)
-                dataValue.text = gChild.value as String
-                dataValue.setTextColor(Color.BLACK)
-                dataValue.setPadding(5, 5, 5, 5)
-                childLayout.addView(dataValue, layoutParams)
-
-                layout.addView(childLayout, layoutParams)
-            }
-        }
-
-        name.text = nameText
-        card.addView(layout)
-        card.setOnLongClickListener(longClickListener)
-        return card
+    private fun getImageView(data:DataObject):ImageView {
+        val imageView = ImageView(applicationContext)
+        Picasso.get().load(data.value as String).into(imageView)
+        imageView.scaleType = ImageView.ScaleType.FIT_CENTER
+        return imageView
     }
 
     private val longClickListener = OnLongClickListener {
@@ -256,13 +268,38 @@ class TemplateBuilderActivity : AppCompatActivity() {
 
         dropObject.visibility = VISIBLE
         target.setBackgroundColor(backgroundColor)
-        val destination = target as LinearLayout
 
-        if (destination.id == R.id.template_builder_layout) {
-            dropInTemplateBuilderLayout(dropObject, destination, target)
-        } else if (destination.id == R.id.layout_elements) {
-            dropInElementsLayout(dropObject, destination, target)
+        if(target is CardView) {
+            dropInCardViewParentLayout(hideContents(dropObject as CardView), target)
+        } else if (target.id == R.id.template_builder_layout) {
+            dropInTemplateBuilderLayout(hideContents(dropObject as CardView), target as LinearLayout, target)
+        } else if (target.id == R.id.layout_elements) {
+            dropInElementsLayout(dropObject, target as LinearLayout, target)
         }
+    }
+
+    private fun hideContents(cv:CardView):CardView {
+        if (cv[0] is LinearLayout) {
+            if ((cv[0] as LinearLayout)[0] is TextView) {
+                (cv[0] as LinearLayout)[0].visibility = GONE
+            }
+        }
+        return cv
+    }
+
+    private fun revealContents(cv:CardView):CardView {
+        if (cv[0] is LinearLayout) {
+            if ((cv[0] as LinearLayout)[0] is TextView) {
+                (cv[0] as LinearLayout)[0].visibility = VISIBLE
+            }
+        }
+        return cv
+    }
+
+    private fun dropInCardViewParentLayout(card: CardView, destination: CardView){
+        removeViewFromParent(card, card.parent as ViewGroup)
+        (destination.parent as ViewGroup).addView(card)
+        card.setOnDragListener(dragListener)
     }
 
     private fun dropInTemplateBuilderLayout(
@@ -274,25 +311,28 @@ class TemplateBuilderActivity : AppCompatActivity() {
             LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT
         )
             .apply {
-                gravity = Gravity.CENTER_HORIZONTAL
+                gravity = Gravity.START
             }
 
         layoutParams.setMargins(10, 3, 10, 10)
-        val owner = dropObject.parent as ViewGroup
-        owner.removeView(dropObject)
-        if(owner.size < 1 && (owner.id == R.id.layout_elements || owner.id == R.id.template_builder_layout)){
+        removeViewFromParent(dropObject, dropObject.parent as ViewGroup)
+        val layout = LinearLayout(applicationContext)
+        layout.addView(dropObject, layoutParams)
+        destination.addView(layout, destination.size-1, layoutParams)
+        dropObject.setOnDragListener(dragListener)
+        target.invalidate()
+    }
+
+    private fun removeViewFromParent(view: View, parent: ViewGroup){
+        parent.removeView(view)
+        if(parent.size < 1 && (parent.id == R.id.layout_elements || parent.id == R.id.template_builder_layout)){
             val space = Space(applicationContext)
             space.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, spaceHeight)
-            owner.addView(space)
-        } else if (owner.size < 1){
-            val parent = owner.parent as ViewGroup
-            parent.removeView(owner)
+            parent.addView(space)
+        } else if (parent.size < 1){
+            val owner = parent.parent as ViewGroup
+            owner.removeView(parent)
         }
-        if(destination.size > 0 && destination[0] is Space ){
-            destination.removeViewAt(0)
-        }
-        destination.addView(dropObject, layoutParams)
-        target.invalidate()
     }
 
     private fun dropInElementsLayout(
@@ -321,7 +361,8 @@ class TemplateBuilderActivity : AppCompatActivity() {
         if(destination.size > 0 && destination[0] is Space ){
             destination.removeViewAt(0)
         }
-        destination.addView(dropObject, layoutParams)
+        destination.addView(revealContents(dropObject as CardView), layoutParams)
+        dropObject.setOnDragListener(null)
         target.invalidate()
     }
 
