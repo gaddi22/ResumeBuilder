@@ -269,12 +269,16 @@ class TemplateBuilderActivity : AppCompatActivity() {
         dropObject.visibility = VISIBLE
         target.setBackgroundColor(backgroundColor)
 
-        if(target is CardView) {
-            dropInCardViewParentLayout(hideContents(dropObject as CardView), target)
-        } else if (target.id == R.id.template_builder_layout) {
-            dropInTemplateBuilderLayout(hideContents(dropObject as CardView), target as LinearLayout, target)
-        } else if (target.id == R.id.layout_elements) {
-            dropInElementsLayout(dropObject, target as LinearLayout, target)
+        when {
+            target is CardView -> {
+                dropInCardViewParentLayout(hideContents(dropObject as CardView), target)
+            }
+            target.id == R.id.template_builder_layout -> {
+                dropInTemplateBuilderLayout(hideContents(dropObject as CardView), target as LinearLayout, target)
+            }
+            target.id == R.id.layout_elements -> {
+                dropInElementsLayout(dropObject, target as LinearLayout, target)
+            }
         }
     }
 
