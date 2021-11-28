@@ -30,7 +30,7 @@
             android:id="@+id/data_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#E1E1E1"
+            android:background="#00E1E1E1"
             android:orientation="vertical">
 
             <androidx.cardview.widget.CardView
