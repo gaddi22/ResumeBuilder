@@ -170,4 +170,20 @@ public class DataRow {
     public String getDataName(){ return dataName; }
 
     public DataObject getObj(){ return obj; }
+
+    public ArrayList<View> getValues() {
+        return values;
+    }
+
+    public LinearLayout getRow() {
+        return row;
+    }
+
+    public LinearLayout getValLayout() {
+        return valLayout;
+    }
+
+    public void setValLayout(LinearLayout valLayout) {
+        this.valLayout = valLayout;
+    }
 }

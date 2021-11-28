@@ -65,7 +65,7 @@ public class DataActivity extends AppCompatActivity implements View.OnClickListe
         //get references to user's database
         userRef = FirebaseDatabase.getInstance().getReference().child("users/"+user.getUid());
 
-        loadValues();
+        //loadValues();
 
         userRef.addValueEventListener(new ValueEventListener() {
             @Override
