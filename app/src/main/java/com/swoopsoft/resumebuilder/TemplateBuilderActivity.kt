@@ -14,6 +14,10 @@ import androidx.core.view.size
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.FirebaseDatabase
+import com.squareup.picasso.Picasso
+import com.swoopsoft.resumebuilder.data.DataObject
+import com.swoopsoft.resumebuilder.data.User
+import java.util.HashMap
 
 class TemplateBuilderActivity : AppCompatActivity() {
 
@@ -22,7 +26,8 @@ class TemplateBuilderActivity : AppCompatActivity() {
     private lateinit var mainLayout: LinearLayout
     private lateinit var saveButton: Button
     private lateinit var resetButton:Button
-    private val resumeElements: ArrayList<DataSnapshot> = ArrayList()
+//    private val resumeElements: ArrayList<DataSnapshot> = ArrayList()
+    private val resumeElements: ArrayList<MutableMap.MutableEntry<String?, DataObject?>>  = ArrayList()
     private val spaceHeight = 1000
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,18 +55,60 @@ class TemplateBuilderActivity : AppCompatActivity() {
     private fun getTemplateObjects(elementsLayout: LinearLayout?) {
         // connect to Firebase
         val dataRef = FirebaseDatabase.getInstance().reference
-        val data = dataRef.child("users").child(FirebaseAuth.getInstance().currentUser!!.uid).child("data")
+//        val data = dataRef.child("users").child(FirebaseAuth.getInstance().currentUser!!.uid).child("data")
+        val data = FirebaseDatabase.getInstance().reference.child("users/" + FirebaseAuth.getInstance().currentUser!!.uid)
+
+        //get references to user's database
         val dataTask = data.get()
             .addOnSuccessListener { dataSnapShot ->
-                for(child in dataSnapShot.children){
-                    resumeElements.add(child)
+                val userObj: User? = dataSnapShot.getValue(User::class.java)
+
+                val dataMap: HashMap<String?, DataObject?> = userObj?.getData() as HashMap<String?, DataObject?>
+
+//                for ((key, value) in dataMap) {
+                for (dataObject in dataMap) {
+//                for (java.util.Map.Entry<String, DataObject> entry : dataMap.entries){
+//                    val row = DataRow(activityRef, value, key, applicationContext)
+//                    rows.add(row)
+//                    mainLayout.addView(row.view)
+                    resumeElements.add(dataObject)
+//                    buildTemplateObjects(dataObject.value, dataObject.key)
                 }
                 buildTemplateObjects(resumeElements)
+//                for(child in dataSnapShot.children){
+//                    resumeElements.add(child)
+//                }
+//                buildTemplateObjects(resumeElements)
             }
             .addOnFailureListener{
 
             }
 
+    }
+
+    private fun buildTemplateObjects(dataList: ArrayList<MutableMap.MutableEntry<String?, DataObject?>>){
+        val layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f
+        )
+            .apply {
+                gravity = Gravity.CENTER_HORIZONTAL
+            }
+        layoutParams.setMargins(10, 10, 10, 10)
+        for((key, value) in dataList){
+            addLayoutToParentLayout(createCard(value, key)!!, layoutParams)
+        }
+    }
+
+    private fun buildTemplateObjects(data: DataObject?, key: String?) {
+//        displayMessageWithToast("buildTemplateObjects(data: DataObject?, key: String?) - " + key + "|" + data!!.getValue().toString(), false)
+        val layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f
+        )
+        .apply {
+            gravity = Gravity.CENTER_HORIZONTAL
+        }
+        layoutParams.setMargins(10, 10, 10, 10)
+        addLayoutToParentLayout(createCard(data, key)!!, layoutParams)
     }
 
     private fun buildTemplateObjects(elements: List<DataSnapshot>){
@@ -73,29 +120,15 @@ class TemplateBuilderActivity : AppCompatActivity() {
                 gravity = Gravity.CENTER_HORIZONTAL
             }
         layoutParams.setMargins(10, 10, 10, 10)
-        var numberPerRow = 2
-        var counter = numberPerRow
-        var layout = LinearLayout(applicationContext)
+//        var numberPerRow = 2
+//        var counter = numberPerRow
+//        var layout = LinearLayout(applicationContext)
         // iterate through documents of user
-//        displayMessageWithToast("before: " + resumeElements.count().toString(), false)
         for(child in elements.iterator()){
             // for each document create a simple card for display
             addLayoutToParentLayout(createCard(child)!!, layoutParams)
-//            if(counter < 1){
-//                addLayoutToParentLayout(layout)
-//                counter = numberPerRow
-//            }
-//            if(counter % numberPerRow == 0){
-//                layout = LinearLayout(applicationContext)
-//                layout.orientation = LinearLayout.HORIZONTAL
-//            }
-//            layout.addView(createCard(child), layoutParams)
-//            counter -= 1
+
         }
-//        if(counter == 0 || counter % numberPerRow != 0){
-//            addLayoutToParentLayout(layout)
-//        }
-//        displayMessageWithToast("after: " + resumeElements.count().toString(), false)
     }
 
     private fun addLayoutToParentLayout(layout: LinearLayout) {
@@ -103,30 +136,106 @@ class TemplateBuilderActivity : AppCompatActivity() {
     }
 
     private fun addLayoutToParentLayout(view:View, params:LinearLayout.LayoutParams){
+//        displayMessageWithToast(view.id.toString(), false)
         elementsLayout.addView(view, params)
     }
 
-    private fun createCard(child: DataSnapshot): View? {
+    private fun createCard(child: DataObject?, key: String?): View? {
+        val card = getCard()
+        val layoutParams = getLayoutParamsForCardContents()
+        val layout = getCardLayout()
+        val childLayout = getChildLayout()
+        val name = getTextView(child?.getValue() as String, key!!)
+        layout.addView(name, layoutParams)
+        if (child.getType() == "text") {
+            childLayout.addView(getTextView(child.getValue() as String, ""))
+        } else {
+            childLayout.addView(getImageView(child))
+        }
+        layout.addView(childLayout)
+        return card
+    }
+
+    private fun getCard():CardView{
         val card = CardView(applicationContext)
         card.setPadding(3, 3, 3, 3)
         card.radius = 15f
         card.cardElevation = 25f
         card.setCardBackgroundColor(Color.WHITE)
+        return card
+    }
 
+    private fun getLayoutParamsForCardContents():LinearLayout.LayoutParams {
         val layoutParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT
         )
 
         layoutParams.setMargins(10, 3, 10, 3)
+        return layoutParams
+    }
 
+    private fun getCardLayout():LinearLayout {
         val layout = LinearLayout(applicationContext)
         layout.orientation = LinearLayout.VERTICAL
         layout.setPadding(2, 2, 2, 2)
+        return layout
+    }
 
-        val name = TextView(applicationContext)
-        var nameText = child.key as String
-        name.setTextColor(Color.BLACK)
-        name.setPadding(5, 5, 5, 5)
+    private fun getChildLayout():LinearLayout {
+        val childLayout = LinearLayout(applicationContext)
+        childLayout.orientation = LinearLayout.HORIZONTAL
+        childLayout.background = resources.getDrawable(R.drawable.custom_rectangular_background,null)
+        return childLayout
+    }
+
+    private fun getTextView(text:String, dataType:String):TextView {
+        val textView = TextView(applicationContext)
+        var nameText = if (dataType.isNotBlank()) "$text($dataType)" else "$text"
+        textView.setTextColor(Color.BLACK)
+        textView.setPadding(5, 5, 5, 5)
+        return textView
+    }
+
+    private fun getImageView(data:DataObject):ImageView {
+        val imageView = ImageView(applicationContext)
+
+//        image.setLayoutParams(params)
+//        linearLayout.addView(image)
+//        imageView.setMaxHeight(linearLayout.getHeight())
+        Picasso.get().load(data.value as String).into(imageView)
+        imageView.scaleType = ImageView.ScaleType.FIT_CENTER
+//        values.add(image)
+
+//        outerParams.height = 300
+
+        return imageView
+    }
+
+    private fun createCard(child: DataSnapshot): View? {
+//        val card = CardView(applicationContext)
+//        card.setPadding(3, 3, 3, 3)
+//        card.radius = 15f
+//        card.cardElevation = 25f
+//        card.setCardBackgroundColor(Color.WHITE)
+        val card = getCard()
+        val layoutParams = getLayoutParamsForCardContents()
+        val layout = getCardLayout()
+
+//        val layoutParams = LinearLayout.LayoutParams(
+//            LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT
+//        )
+//
+//        layoutParams.setMargins(10, 3, 10, 3)
+
+//        val layout = LinearLayout(applicationContext)
+//        layout.orientation = LinearLayout.VERTICAL
+//        layout.setPadding(2, 2, 2, 2)
+
+//        val name = TextView(applicationContext)
+//        var nameText = child.key as String
+//        name.setTextColor(Color.BLACK)
+//        name.setPadding(5, 5, 5, 5)
+        val name = getTextView(child.key as String, "")
         layout.addView(name, layoutParams)
 //displayMessageWithToast("grandchild count: " + child.children.count().toString(), false)
         for(gChild in child.children) {
@@ -135,20 +244,21 @@ class TemplateBuilderActivity : AppCompatActivity() {
             childLayout.background = resources.getDrawable(R.drawable.custom_rectangular_background,null)
 
             if(gChild.key.toString() == "type"){
-                nameText = nameText + " (" + gChild.value.toString() + ")"
+//                nameText = nameText + " (" + gChild.value.toString() + ")"
             } else {
 
-                val dataValue = TextView(applicationContext)
-                dataValue.text = gChild.value as String
-                dataValue.setTextColor(Color.BLACK)
-                dataValue.setPadding(5, 5, 5, 5)
+//                val dataValue = TextView(applicationContext)
+//                dataValue.text = gChild.value as String
+//                dataValue.setTextColor(Color.BLACK)
+//                dataValue.setPadding(5, 5, 5, 5)
+                val dataValue = getTextView(gChild.value as String, "")
                 childLayout.addView(dataValue, layoutParams)
 
                 layout.addView(childLayout, layoutParams)
             }
         }
 
-        name.text = nameText
+//        name.text = nameText
         card.addView(layout)
         card.setOnLongClickListener(longClickListener)
         return card
