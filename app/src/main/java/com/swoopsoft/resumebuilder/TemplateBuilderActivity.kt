@@ -169,6 +169,7 @@ class TemplateBuilderActivity : AppCompatActivity() {
         card.cardElevation = 25f
         card.setCardBackgroundColor(Color.WHITE)
         card.setOnLongClickListener(longClickListener)
+//        card.setOnDragListener(dragListener)
         return card
     }
 
@@ -383,13 +384,62 @@ class TemplateBuilderActivity : AppCompatActivity() {
 
         dropObject.visibility = VISIBLE
         target.setBackgroundColor(backgroundColor)
-        val destination = target as LinearLayout
+//        val destination = target as LinearLayout
 
-        if (destination.id == R.id.template_builder_layout) {
-            dropInTemplateBuilderLayout(dropObject, destination, target)
-        } else if (destination.id == R.id.layout_elements) {
-            dropInElementsLayout(dropObject, destination, target)
+        if(target is CardView) {
+            dropInCardViewParentLayout(hideContents(dropObject as CardView), target)
+        } else if (target.id == R.id.template_builder_layout) {
+//            val layoutParams = LinearLayout.LayoutParams(
+//                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT
+//            )
+//                .apply {
+////                gravity = Gravity.CENTER_HORIZONTAL
+//                    gravity = Gravity.START
+//                }
+//
+//            layoutParams.setMargins(10, 3, 10, 10)
+//            val layout = LinearLayout(applicationContext)
+//            layout.addView(dropObject, layoutParams)
+//            dropInTemplateBuilderLayout(layout, destination, target)
+            dropInTemplateBuilderLayout(hideContents(dropObject as CardView), target as LinearLayout, target)
+        } else if (target.id == R.id.layout_elements) {
+            dropInElementsLayout(dropObject, target as LinearLayout, target)
         }
+    }
+
+    private fun hideContents(cv:CardView):CardView {
+        if (cv[0] is LinearLayout) {
+            if ((cv[0] as LinearLayout)[0] is TextView) {
+                (cv[0] as LinearLayout)[0].visibility = GONE
+            }
+        }
+        return cv
+    }
+
+    private fun revealContents(cv:CardView):CardView {
+        if (cv[0] is LinearLayout) {
+            if ((cv[0] as LinearLayout)[0] is TextView) {
+                (cv[0] as LinearLayout)[0].visibility = VISIBLE
+            } else {
+                displayMessageWithToast("TextView - " + (cv[0] as LinearLayout)[0].javaClass.simpleName)
+            }
+        } else {
+            displayMessageWithToast("LinearLayout - " + cv[0].javaClass.simpleName)
+        }
+        return cv
+    }
+
+    private fun dropInCardViewParentLayout(card: CardView, destination: CardView){
+//        if(dropObject is CardView) {
+//            if (dropObject[0] is LinearLayout) {
+//                if ((dropObject[0] as LinearLayout)[0] is TextView) {
+//                    (dropObject[0] as LinearLayout)[0].visibility = GONE
+//                }
+//            }
+        removeViewFromParent(card, card.parent as ViewGroup)
+        (destination.parent as ViewGroup).addView(card)
+        card.setOnDragListener(dragListener)
+//        }
     }
 
     private fun dropInTemplateBuilderLayout(
@@ -401,25 +451,60 @@ class TemplateBuilderActivity : AppCompatActivity() {
             LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT
         )
             .apply {
-                gravity = Gravity.CENTER_HORIZONTAL
+//                gravity = Gravity.CENTER_HORIZONTAL
+                gravity = Gravity.START
             }
 
         layoutParams.setMargins(10, 3, 10, 10)
-        val owner = dropObject.parent as ViewGroup
-        owner.removeView(dropObject)
-        if(owner.size < 1 && (owner.id == R.id.layout_elements || owner.id == R.id.template_builder_layout)){
+//        val owner = dropObject.parent as ViewGroup
+//        owner.removeView(dropObject)
+//        if(owner.size < 1 && (owner.id == R.id.layout_elements || owner.id == R.id.template_builder_layout)){
+//            val space = Space(applicationContext)
+//            space.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, spaceHeight)
+//            owner.addView(space)
+//        } else if (owner.size < 1){
+//            val parent = owner.parent as ViewGroup
+//            parent.removeView(owner)
+//        }
+//        if(destination.size > 0 && destination[0] is Space ){
+//            destination.removeViewAt(0)
+//
+//        }
+        removeViewFromParent(dropObject, dropObject.parent as ViewGroup)
+//        if(dropObject is CardView) {
+//            if(dropObject[0] is LinearLayout){
+//                if((dropObject[0] as LinearLayout)[0] is TextView){
+//                    (dropObject[0] as LinearLayout)[0].visibility = GONE
+//                }
+////                if((dropObject[0] as LinearLayout)[1] is LinearLayout){
+////                    if(((dropObject[0] as LinearLayout)[1] as LinearLayout)[0] is TextView){
+////                        ((dropObject[0] as LinearLayout)[1] as LinearLayout)[0].visibility = GONE
+////                    }
+////                }
+//            }
+//            destination.addView(dropObject, destination.size-1, layoutParams)
+//        } else {
+//            val space = Space(applicationContext)
+//            space.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, spaceHeight)
+//            destination.addView(space)
+//        }
+        val layout = LinearLayout(applicationContext)
+        layout.addView(dropObject, layoutParams)
+        destination.addView(layout, destination.size-1, layoutParams)
+        dropObject.setOnDragListener(dragListener)
+        target.invalidate()
+    }
+
+    private fun removeViewFromParent(view: View, parent: ViewGroup){
+        parent.removeView(view)
+        if(parent.size < 1 && (parent.id == R.id.layout_elements || parent.id == R.id.template_builder_layout)){
             val space = Space(applicationContext)
             space.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, spaceHeight)
-            owner.addView(space)
-        } else if (owner.size < 1){
-            val parent = owner.parent as ViewGroup
-            parent.removeView(owner)
+            parent.addView(space)
+        } else if (parent.size < 1){
+            val owner = parent.parent as ViewGroup
+            owner.removeView(parent)
         }
-        if(destination.size > 0 && destination[0] is Space ){
-            destination.removeViewAt(0)
-        }
-        destination.addView(dropObject, layoutParams)
-        target.invalidate()
     }
 
     private fun dropInElementsLayout(
@@ -437,6 +522,10 @@ class TemplateBuilderActivity : AppCompatActivity() {
         layoutParams.setMargins(10, 3, 10, 10)
         val owner = dropObject.parent as ViewGroup
         owner.removeView(dropObject)
+//        if(owner.size < 1 && owner.id != R.id.template_builder_layout){
+//            val ownerParent = owner.parent as ViewGroup
+//            ownerParent.removeView(owner)
+//        }
         if(owner.size < 1 && (owner.id == R.id.layout_elements || owner.id == R.id.template_builder_layout)){
             val space = Space(applicationContext)
             space.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, spaceHeight)
@@ -448,7 +537,22 @@ class TemplateBuilderActivity : AppCompatActivity() {
         if(destination.size > 0 && destination[0] is Space ){
             destination.removeViewAt(0)
         }
-        destination.addView(dropObject, layoutParams)
+//        if(dropObject is CardView) {
+//            if(dropObject[0] is LinearLayout){
+//                if((dropObject[0] as LinearLayout)[0] is TextView){
+//                    (dropObject[0] as LinearLayout)[0].visibility = VISIBLE
+//                }
+////                if((dropObject[0] as LinearLayout)[1] is LinearLayout){
+////                    if(((dropObject[0] as LinearLayout)[1] as LinearLayout)[0] is TextView){
+////                        ((dropObject[0] as LinearLayout)[1] as LinearLayout)[0].visibility = VISIBLE
+////                    }
+////                }
+//            }
+//            destination.addView(dropObject, layoutParams)
+//        }
+        displayMessageWithToast(dropObject.javaClass.simpleName)
+        destination.addView(revealContents(dropObject as CardView), layoutParams)
+        dropObject.setOnDragListener(null)
         target.invalidate()
     }
 
