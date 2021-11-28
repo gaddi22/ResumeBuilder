@@ -96,8 +96,10 @@ public class DataActivity extends AppCompatActivity implements View.OnClickListe
                         DataRow row = new DataRow( activityRef, entry.getValue(), entry.getKey(), getApplicationContext());
                         rows.add(row);
                         mainLayout.addView(row.getView());
-                        Toast.makeText(getApplicationContext(),"Loading Done",Toast.LENGTH_LONG).show();
+
                     }
+
+                    Toast.makeText(getApplicationContext(),"Loading Done",Toast.LENGTH_LONG).show();
                 }
             }
         });
