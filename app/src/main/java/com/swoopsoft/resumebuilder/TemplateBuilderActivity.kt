@@ -74,6 +74,7 @@ class TemplateBuilderActivity : AppCompatActivity() {
                     resumeElements.add(dataObject)
 //                    buildTemplateObjects(dataObject.value, dataObject.key)
                 }
+//                displayMessageWithToast(resumeElements.size.toString())
                 buildTemplateObjects(resumeElements)
 //                for(child in dataSnapShot.children){
 //                    resumeElements.add(child)
@@ -95,41 +96,42 @@ class TemplateBuilderActivity : AppCompatActivity() {
             }
         layoutParams.setMargins(10, 10, 10, 10)
         for((key, value) in dataList){
+//            displayMessageWithToast("$key - $value", false)
             addLayoutToParentLayout(createCard(value, key)!!, layoutParams)
         }
     }
 
-    private fun buildTemplateObjects(data: DataObject?, key: String?) {
-//        displayMessageWithToast("buildTemplateObjects(data: DataObject?, key: String?) - " + key + "|" + data!!.getValue().toString(), false)
-        val layoutParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f
-        )
-        .apply {
-            gravity = Gravity.CENTER_HORIZONTAL
-        }
-        layoutParams.setMargins(10, 10, 10, 10)
-        addLayoutToParentLayout(createCard(data, key)!!, layoutParams)
-    }
+//    private fun buildTemplateObjects(data: DataObject?, key: String?) {
+////        displayMessageWithToast("buildTemplateObjects(data: DataObject?, key: String?) - " + key + "|" + data!!.getValue().toString(), false)
+//        val layoutParams = LinearLayout.LayoutParams(
+//            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f
+//        )
+//        .apply {
+//            gravity = Gravity.CENTER_HORIZONTAL
+//        }
+//        layoutParams.setMargins(10, 10, 10, 10)
+//        addLayoutToParentLayout(createCard(data, key)!!, layoutParams)
+//    }
 
-    private fun buildTemplateObjects(elements: List<DataSnapshot>){
-        // configure layout parameters
-        val layoutParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f
-        )
-            .apply {
-                gravity = Gravity.CENTER_HORIZONTAL
-            }
-        layoutParams.setMargins(10, 10, 10, 10)
-//        var numberPerRow = 2
-//        var counter = numberPerRow
-//        var layout = LinearLayout(applicationContext)
-        // iterate through documents of user
-        for(child in elements.iterator()){
-            // for each document create a simple card for display
-            addLayoutToParentLayout(createCard(child)!!, layoutParams)
-
-        }
-    }
+//    private fun buildTemplateObjects(elements: List<DataSnapshot>){
+//        // configure layout parameters
+//        val layoutParams = LinearLayout.LayoutParams(
+//            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f
+//        )
+//            .apply {
+//                gravity = Gravity.CENTER_HORIZONTAL
+//            }
+//        layoutParams.setMargins(10, 10, 10, 10)
+////        var numberPerRow = 2
+////        var counter = numberPerRow
+////        var layout = LinearLayout(applicationContext)
+//        // iterate through documents of user
+//        for(child in elements.iterator()){
+//            // for each document create a simple card for display
+//            addLayoutToParentLayout(createCard(child)!!, layoutParams)
+//
+//        }
+//    }
 
     private fun addLayoutToParentLayout(layout: LinearLayout) {
         elementsLayout.addView(layout)
@@ -143,16 +145,20 @@ class TemplateBuilderActivity : AppCompatActivity() {
     private fun createCard(child: DataObject?, key: String?): View? {
         val card = getCard()
         val layoutParams = getLayoutParamsForCardContents()
+        val imageLayoutParams = getImageLayoutParams()
         val layout = getCardLayout()
         val childLayout = getChildLayout()
-        val name = getTextView(child?.getValue() as String, key!!)
+//        val name = getTextView(child?.getValue() as String, key!!)
+        val name = getTextView(key!!, child!!.getType())
         layout.addView(name, layoutParams)
-        if (child.getType() == "text") {
+//        displayMessageWithToast(child?.getValue() as String)
+        if (child.getType().lowercase() == "text") {
             childLayout.addView(getTextView(child.getValue() as String, ""))
         } else {
-            childLayout.addView(getImageView(child))
+            childLayout.addView(getImageView(child), imageLayoutParams)
         }
         layout.addView(childLayout)
+        card.addView(layout)
         return card
     }
 
@@ -162,6 +168,7 @@ class TemplateBuilderActivity : AppCompatActivity() {
         card.radius = 15f
         card.cardElevation = 25f
         card.setCardBackgroundColor(Color.WHITE)
+        card.setOnLongClickListener(longClickListener)
         return card
     }
 
@@ -171,6 +178,15 @@ class TemplateBuilderActivity : AppCompatActivity() {
         )
 
         layoutParams.setMargins(10, 3, 10, 3)
+        return layoutParams
+    }
+
+    private fun getImageLayoutParams():LinearLayout.LayoutParams {
+        val layoutParams = LinearLayout.LayoutParams(
+            150, 150
+        )
+
+        layoutParams.setMargins(3, 3, 3, 3)
         return layoutParams
     }
 
@@ -190,9 +206,10 @@ class TemplateBuilderActivity : AppCompatActivity() {
 
     private fun getTextView(text:String, dataType:String):TextView {
         val textView = TextView(applicationContext)
-        var nameText = if (dataType.isNotBlank()) "$text($dataType)" else "$text"
+        var nameText = if (dataType.isNotBlank()) "$text ($dataType)" else text
         textView.setTextColor(Color.BLACK)
         textView.setPadding(5, 5, 5, 5)
+        textView.text = nameText
         return textView
     }
 
