@@ -1,29 +1,27 @@
 package com.swoopsoft.resumebuilder;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
-
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import java.util.Map;
+import java.util.Objects;
 
 public class ChooseTemplateActivity extends AppCompatActivity {
 
     Button btnBuildTemplate;
     LinearLayout llDocumentContainer;
+    LinearLayout llDocumentViewer;
+    Map<String, Object> templateData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +30,7 @@ public class ChooseTemplateActivity extends AppCompatActivity {
 
         btnBuildTemplate = findViewById(R.id.btnChooseTemplateBuildTemplate);
         llDocumentContainer = findViewById(R.id.linearLayoutDocumentContainer);
+        llDocumentViewer = findViewById(R.id.linearLayoutDocumentViewer);
 
         btnBuildTemplate.setOnClickListener(view -> openBuildTemplateActivity());
 
@@ -44,7 +43,7 @@ public class ChooseTemplateActivity extends AppCompatActivity {
 
     private void getDocuments(){
         // connect to Firebase
-        DocumentReference templateRef = FirebaseFirestore.getInstance().collection("templates").document(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        DocumentReference templateRef = FirebaseFirestore.getInstance().collection("templates").document(Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid());
         // iterate through documents of user
         templateRef.get()
             .addOnSuccessListener(documentSnapshot -> {
@@ -53,10 +52,11 @@ public class ChooseTemplateActivity extends AppCompatActivity {
                         LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
 
                 layoutParams.setMargins(5, 10, 5, 10);
-
-                documentSnapshot.getData().keySet().forEach(key -> {
+                templateData = documentSnapshot.getData();
+                Objects.requireNonNull(documentSnapshot.getData()).keySet().forEach(key -> {
                     // create the cardView with the key
                     CardView card = getCard(key, "");
+                    card.setOnClickListener(onClick);
                     // put the cardView in the layout
                     llDocumentContainer.addView(card, layoutParams);
                 });
@@ -64,25 +64,6 @@ public class ChooseTemplateActivity extends AppCompatActivity {
             .addOnFailureListener(e -> {
 
             });
-        // for each document create a simple card for display
-
-
-//        LinearLayout ll_1 = new LinearLayout(getApplicationContext());
-//        ll_1.setOrientation(LinearLayout.HORIZONTAL);
-//        LinearLayout ll_2 = new LinearLayout(getApplicationContext());
-//        ll_2.setOrientation(LinearLayout.HORIZONTAL);
-//        LinearLayout ll_3 = new LinearLayout(getApplicationContext());
-//        ll_3.setOrientation(LinearLayout.HORIZONTAL);
-//        ll_1.addView(getCard("Name of Document","10/10/10"), layoutParams);
-//        ll_1.addView(getCard("Second Document", "11/11/11"), layoutParams);
-//        ll_1.addView(getCard("Third Document", "12/12/12"), layoutParams);
-//        ll_2.addView(getCard("Fourth Document", "4/4/14"), layoutParams);
-//        ll_2.addView(getCard("Fifth Document", "5/5/15"), layoutParams);
-//        ll_3.addView(getCard("Sixth Document", "6/6/16"), layoutParams);
-//
-//        llDocumentContainer.addView(ll_1);
-//        llDocumentContainer.addView(ll_2);
-//        llDocumentContainer.addView(ll_3);
     }
 
     private CardView getCard(String nameString, String dateString){
@@ -116,5 +97,38 @@ public class ChooseTemplateActivity extends AppCompatActivity {
 
         card.addView(layout);
         return card;
+    }
+
+    private final View.OnClickListener onClick = (View view) -> {
+        if(view instanceof CardView) {
+            clearLLDocumentViewer();
+            TextView tView = (TextView) ((LinearLayout)((CardView) view).getChildAt(0)).getChildAt(0);
+            displayDocument(tView.getText().toString());
+        }
+    };
+
+    private void clearLLDocumentViewer() {
+        llDocumentViewer.removeAllViews();
+    }
+
+    private void displayDocument(String templateKey) {
+        Map<String, Object> rowData = ((Map<String, Object>) templateData.get(templateKey));
+        if (rowData != null) {
+            for (Object object:rowData.values()) {
+                // create row
+                Map<String, Object> cellData = (Map<String, Object>) object;
+                for(Object cell: cellData.values()){
+                    // create cell
+                    String value = cell.toString();
+                    TextView tView = new TextView(getApplicationContext());
+                    tView.setText(value);
+                    llDocumentViewer.addView(tView);
+                }
+            }
+        }
+    }
+
+    private void displayToastWithMessage(String message, int length){
+        Toast.makeText(getApplicationContext(),message,length).show();
     }
 }
