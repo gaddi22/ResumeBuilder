@@ -167,8 +167,6 @@ public class ChooseTemplateActivity extends AppCompatActivity {
                             llDocumentViewer.addView(rowLayout, layoutParams);
                         }
                     }
-
-                    Toast.makeText(getApplicationContext(),"Loading Done",Toast.LENGTH_LONG).show();
                 }
             }
         });
