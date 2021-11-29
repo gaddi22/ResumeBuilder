@@ -91,6 +91,8 @@ public class DataActivity extends AppCompatActivity implements View.OnClickListe
                     User userObj = task.getResult().getValue(User.class);
 
                     HashMap<String,DataObject> dataMap = (HashMap) userObj.getData();
+                    if(dataMap == null) dataMap = new HashMap<String,DataObject>();
+
 
                     for(Map.Entry<String, DataObject> entry : dataMap.entrySet()){
                         DataRow row = new DataRow( activityRef, entry.getValue(), entry.getKey(), getApplicationContext());
