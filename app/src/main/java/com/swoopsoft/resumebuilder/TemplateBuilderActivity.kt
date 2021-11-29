@@ -9,15 +9,23 @@ import android.view.*
 import android.view.View.*
 import android.widget.*
 import androidx.cardview.widget.CardView
+import androidx.core.view.children
 import androidx.core.view.get
 import androidx.core.view.size
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.firestore.SetOptions
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.squareup.picasso.Picasso
 import com.swoopsoft.resumebuilder.data.DataObject
 import com.swoopsoft.resumebuilder.data.User
-import java.util.HashMap
+import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.util.*
+import kotlin.collections.ArrayList
 
 class TemplateBuilderActivity : AppCompatActivity() {
 
@@ -385,7 +393,63 @@ class TemplateBuilderActivity : AppCompatActivity() {
     }
 
     private val onSaveActionSelected = fun (item: View) {
-        displayMessageWithToast("save for " + item.id)
+        val sdf = SimpleDateFormat("yyyyMMdd_hh_mm_ss")
+        val key = sdf.format(Date())
+        val dataMap = HashMap<String, HashMap<String, HashMap<String, String>>>()
+        val rowMap = HashMap<String, HashMap<String, String>>()
+        var rowCounter = 0
+        for(row in templateLayout.children){
+            if(row is LinearLayout){
+                val cellMap = HashMap<String, String>()
+                var cellCounter = 0
+                for(cell in row.children){
+                    cellMap[cellCounter.toString()] = getKey(cell)
+                    cellCounter += 1
+                }
+                rowMap[rowCounter.toString()] = cellMap
+                rowCounter += 1
+            }
+        }
+        dataMap[key] = rowMap
+        saveRowMapToDatabase(dataMap)
+    }
+
+    private fun saveRowMapToDatabase(dataMap: HashMap<String, HashMap<String, HashMap<String, String>>>) {
+        val db = Firebase.firestore
+        val myAuth = FirebaseAuth.getInstance()
+        db.collection("templates").document(myAuth.currentUser!!.uid)
+            .set(dataMap, SetOptions.merge())
+            .addOnSuccessListener {
+                // go back to the TemplateChooser
+                displayMessageWithToast("Template ${dataMap.keys} Created Successfully")
+                finish()
+            }
+            .addOnFailureListener{
+                displayMessageWithToast("Template was not created: ${it.message}")
+            }
+    }
+
+    private fun getKey(cell: View): String {
+        var returnKey = ""
+        if(cell is LinearLayout){
+            if(cell[0] is CardView){
+                returnKey = getKeyFromCardView(cell[0] as CardView)
+            }
+        } else if(cell is CardView){
+            returnKey = getKeyFromCardView(cell)
+        }
+        return returnKey
+    }
+
+    private fun getKeyFromCardView(card:CardView):String {
+        var returnKey = ""
+        if (card[0] is LinearLayout) {
+            if ((card[0] as LinearLayout)[0] is TextView) {
+                val tView = (card[0] as LinearLayout)[0] as TextView
+                returnKey = tView.text.subSequence(0, tView.text.indexOf("(")).trim().toString()
+            }
+        }
+        return returnKey
     }
 
     private val onResetActionSelected = fun (item: View) {
