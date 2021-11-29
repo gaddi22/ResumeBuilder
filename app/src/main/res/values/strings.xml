@@ -38,5 +38,6 @@
     <string name="data_key_weight">16</string>
     <string name="data_values_weight">40</string>
     <string name="data_button_weight">1</string>
+    <string name="simpleDateFormatForTemplateSave">yyyyMMdd_hh_mm_ss</string>
 
 </resources>

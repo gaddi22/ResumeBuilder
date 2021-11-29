@@ -13,8 +13,6 @@ import androidx.core.view.children
 import androidx.core.view.get
 import androidx.core.view.size
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
@@ -23,7 +21,6 @@ import com.squareup.picasso.Picasso
 import com.swoopsoft.resumebuilder.data.DataObject
 import com.swoopsoft.resumebuilder.data.User
 import java.text.SimpleDateFormat
-import java.time.LocalDateTime
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -48,7 +45,7 @@ class TemplateBuilderActivity : AppCompatActivity() {
         saveButton = findViewById(R.id.btnSaveTemplate)
         resetButton = findViewById(R.id.btnResetTemplate)
 
-        getTemplateObjects(elementsLayout)
+        getTemplateObjects()
 
         templateLayout.setOnDragListener(dragListener)
         elementsLayout.setOnDragListener(dragListener)
@@ -59,13 +56,12 @@ class TemplateBuilderActivity : AppCompatActivity() {
 
     }
 
-    private fun getTemplateObjects(elementsLayout: LinearLayout?) {
+    private fun getTemplateObjects() {
         // connect to Firebase
-        val dataRef = FirebaseDatabase.getInstance().reference
         val data = FirebaseDatabase.getInstance().reference.child("users/" + FirebaseAuth.getInstance().currentUser!!.uid)
 
         //get references to user's database
-        val dataTask = data.get()
+        data.get()
             .addOnSuccessListener { dataSnapShot ->
                 val userObj: User? = dataSnapShot.getValue(User::class.java)
 
@@ -90,7 +86,7 @@ class TemplateBuilderActivity : AppCompatActivity() {
             }
         layoutParams.setMargins(10, 10, 10, 10)
         for((key, value) in dataList){
-            addLayoutToElementsLayout(createCard(value, key)!!, layoutParams)
+            addLayoutToElementsLayout(createCard(value, key), layoutParams)
         }
     }
 
@@ -98,7 +94,7 @@ class TemplateBuilderActivity : AppCompatActivity() {
         elementsLayout.addView(view, params)
     }
 
-    private fun createCard(child: DataObject?, key: String?): View? {
+    private fun createCard(child: DataObject?, key: String?): View {
         val card = getCard()
         val layoutParams = getLayoutParamsForCardContents()
         val imageLayoutParams = getImageLayoutParams()
@@ -160,7 +156,7 @@ class TemplateBuilderActivity : AppCompatActivity() {
 
     private fun getTextView(text:String, dataType:String):TextView {
         val textView = TextView(applicationContext)
-        var nameText = if (dataType.isNotBlank()) "$text ($dataType)" else text
+        val nameText = if (dataType.isNotBlank()) "$text ($dataType)" else text
         textView.setTextColor(Color.BLACK)
         textView.setPadding(5, 5, 5, 5)
         textView.text = nameText
@@ -188,38 +184,38 @@ class TemplateBuilderActivity : AppCompatActivity() {
         true
     }
 
-    private val clickListener = OnClickListener {
-        val clipText = "This is our clipData text"
-        val item = ClipData.Item(clipText)
-        val mimeTypes = arrayOf(ClipDescription.MIMETYPE_TEXT_PLAIN)
-        val data = ClipData(clipText, mimeTypes, item)
-
-        val dragShadowBuilder = DragShadowBuilder(it)
-        it.startDragAndDrop(data, dragShadowBuilder, it, 0)
-
-        it.visibility = INVISIBLE
-        true
-    }
-
-    private val touchListener = OnTouchListener { it, motionEvent ->
-        when(motionEvent.action) {
-            MotionEvent.ACTION_DOWN -> {
-                val clipText = "This is our clipData text"
-                val item = ClipData.Item(clipText)
-                val mimeTypes = arrayOf(ClipDescription.MIMETYPE_TEXT_PLAIN)
-                val data = ClipData(clipText, mimeTypes, item)
-
-                val dragShadowBuilder = DragShadowBuilder(it)
-                it.startDragAndDrop(data, dragShadowBuilder, it, 0)
-
-                it.visibility = INVISIBLE
-            }
-            MotionEvent.ACTION_UP -> {
-                it.performClick()
-            }
-        }
-        true
-    }
+//    private val clickListener = OnClickListener {
+//        val clipText = "This is our clipData text"
+//        val item = ClipData.Item(clipText)
+//        val mimeTypes = arrayOf(ClipDescription.MIMETYPE_TEXT_PLAIN)
+//        val data = ClipData(clipText, mimeTypes, item)
+//
+//        val dragShadowBuilder = DragShadowBuilder(it)
+//        it.startDragAndDrop(data, dragShadowBuilder, it, 0)
+//
+//        it.visibility = INVISIBLE
+//        true
+//    }
+//
+//    private val touchListener = OnTouchListener { it, motionEvent ->
+//        when(motionEvent.action) {
+//            MotionEvent.ACTION_DOWN -> {
+//                val clipText = "This is our clipData text"
+//                val item = ClipData.Item(clipText)
+//                val mimeTypes = arrayOf(ClipDescription.MIMETYPE_TEXT_PLAIN)
+//                val data = ClipData(clipText, mimeTypes, item)
+//
+//                val dragShadowBuilder = DragShadowBuilder(it)
+//                it.startDragAndDrop(data, dragShadowBuilder, it, 0)
+//
+//                it.visibility = INVISIBLE
+//            }
+//            MotionEvent.ACTION_UP -> {
+//                it.performClick()
+//            }
+//        }
+//        true
+//    }
 
     private val dragListener = OnDragListener{ view, event ->
         val v = event.localState as View
@@ -392,8 +388,8 @@ class TemplateBuilderActivity : AppCompatActivity() {
         }
     }
 
-    private val onSaveActionSelected = fun (item: View) {
-        val sdf = SimpleDateFormat("yyyyMMdd_hh_mm_ss")
+    private val onSaveActionSelected = fun (_: View) {
+        val sdf = SimpleDateFormat(getString(R.string.simpleDateFormatForTemplateSave))
         val key = sdf.format(Date())
         val dataMap = HashMap<String, HashMap<String, HashMap<String, String>>>()
         val rowMap = HashMap<String, HashMap<String, String>>()
@@ -402,7 +398,7 @@ class TemplateBuilderActivity : AppCompatActivity() {
             if(row is LinearLayout){
                 val cellMap = HashMap<String, String>()
                 var cellCounter = 0
-                for(cell in row.children){
+                row.children.forEach { cell ->
                     cellMap[cellCounter.toString()] = getKey(cell)
                     cellCounter += 1
                 }
@@ -452,7 +448,7 @@ class TemplateBuilderActivity : AppCompatActivity() {
         return returnKey
     }
 
-    private val onResetActionSelected = fun (item: View) {
+    private val onResetActionSelected = fun (_: View) {
         resetResumeLayout()
         clearTemplateObjects()
         buildTemplateObjects(resumeElements)
