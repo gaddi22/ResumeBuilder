@@ -68,13 +68,16 @@ public class ChooseTemplateActivity extends AppCompatActivity {
 
                 layoutParams.setMargins(5, 10, 5, 10);
                 templateData = documentSnapshot.getData();
-                Objects.requireNonNull(documentSnapshot.getData()).keySet().forEach(key -> {
-                    // create the cardView with the key
-                    CardView card = getCard(key, "");
-                    card.setOnClickListener(onClick);
-                    // put the cardView in the layout
-                    llDocumentContainer.addView(card, layoutParams);
-                });
+                if(templateData == null || templateData.keySet().size()<1){}
+                else {
+                    Objects.requireNonNull(documentSnapshot.getData()).keySet().forEach(key -> {
+                        // create the cardView with the key
+                        CardView card = getCard(key, "");
+                        card.setOnClickListener(onClick);
+                        // put the cardView in the layout
+                        llDocumentContainer.addView(card, layoutParams);
+                    });
+                }
             })
             .addOnFailureListener(e -> {
 
