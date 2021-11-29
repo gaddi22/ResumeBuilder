@@ -145,7 +145,9 @@ public class ChooseTemplateActivity extends AppCompatActivity {
             public void onComplete(@NonNull Task<DataSnapshot> task) {
                 if(task.isSuccessful()){
                     User userObj = task.getResult().getValue(User.class);
-
+                    if(userObj == null || userObj.getData() == null){
+                        return;
+                    }
                     HashMap<String, DataObject> dataMap = (HashMap) userObj.getData();
 
                     Map<String, Object> rowData = ((Map<String, Object>) templateData.get(templateKey));
