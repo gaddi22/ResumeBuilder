@@ -65,12 +65,14 @@ class TemplateBuilderActivity : AppCompatActivity() {
             .addOnSuccessListener { dataSnapShot ->
                 val userObj: User? = dataSnapShot.getValue(User::class.java)
 
-                val dataMap: HashMap<String?, DataObject?> = userObj?.getData() as HashMap<String?, DataObject?>
+                if(userObj != null && userObj.getData() != null) {
+                    val dataMap: HashMap<String?, DataObject?> = userObj.getData() as HashMap<String?, DataObject?>
 
-                for (dataObject in dataMap) {
-                    resumeElements.add(dataObject)
+                    for (dataObject in dataMap) {
+                        resumeElements.add(dataObject)
+                    }
+                    buildTemplateObjects(resumeElements)
                 }
-                buildTemplateObjects(resumeElements)
             }
             .addOnFailureListener{
 
