@@ -99,7 +99,7 @@ public class DataActivity extends AppCompatActivity implements View.OnClickListe
 
                     }
 
-                    Toast.makeText(getApplicationContext(),"Loading Done",Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(),"Loading Done",Toast.LENGTH_SHORT).show();
                 }
             }
         });

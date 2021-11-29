@@ -163,13 +163,10 @@ public class ChooseTemplateActivity extends AppCompatActivity {
                                     tView.setText(value);
                                     rowLayout.addView(tView, layoutParams);
                                 }
-                                //llDocumentViewer.addView(tView);
                             }
                             llDocumentViewer.addView(rowLayout, layoutParams);
                         }
                     }
-
-                    Toast.makeText(getApplicationContext(),"Loading Done",Toast.LENGTH_LONG).show();
                 }
             }
         });
