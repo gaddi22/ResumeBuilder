@@ -156,15 +156,17 @@ public class ChooseTemplateActivity extends AppCompatActivity {
                             Map<String, Object> cellData = (Map<String, Object>) object;
                             for(Object cell: cellData.values()){
                                 // create cell
-                                String value = dataMap.get(cell.toString()).value.toString();
-                                if(value.contains("firebasestorage")){
-                                    ImageView iView = new ImageView(getApplicationContext());
-                                    Picasso.get().load(value).into(iView);
-                                    rowLayout.addView(iView, imageLayoutParams);
-                                } else {
-                                    TextView tView = new TextView(getApplicationContext());
-                                    tView.setText(value);
-                                    rowLayout.addView(tView, layoutParams);
+                                if (dataMap.get(cell.toString()) != null) {
+                                    String value = dataMap.get(cell.toString()).value.toString();
+                                    if (value.contains("firebasestorage")) {
+                                        ImageView iView = new ImageView(getApplicationContext());
+                                        Picasso.get().load(value).into(iView);
+                                        rowLayout.addView(iView, imageLayoutParams);
+                                    } else {
+                                        TextView tView = new TextView(getApplicationContext());
+                                        tView.setText(value);
+                                        rowLayout.addView(tView, layoutParams);
+                                    }
                                 }
                             }
                             llDocumentViewer.addView(rowLayout, layoutParams);
